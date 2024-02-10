@@ -15,7 +15,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<Actor> ContentActor { get; set; }
         public DbSet<Director> ContentDirectors { get; set; }
 
-
+        public DbSet<ContentActor> ContentsActors { get; set; }
         public DbSet<Award> Awards { get; set; }
         public DbSet<ContentAward> ContentAwards { get; set; }
         public DbSet<ContentGenre> ContentGenres { get; set; }

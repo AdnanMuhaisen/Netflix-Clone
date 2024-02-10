@@ -21,7 +21,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
             builder.Property(x => x.Price)
                 .HasPrecision(5, 2);
 
-            //relationships
+            #region relationships
 
             builder.HasMany(x => x.PlanFeatures)
                 .WithMany(x => x.FeaturePlans)
@@ -30,6 +30,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 r => r.HasOne(x => x.SubscriptionPlanFeature).WithMany(x => x.SubscriptionPlansFeatures).IsRequired(true),
                 l => l.HasOne(x => x.SubscriptionPlan).WithMany(x => x.SubscriptionPlansFeatures).IsRequired(true)
                 );
+
+            #endregion
         }
     }
 }

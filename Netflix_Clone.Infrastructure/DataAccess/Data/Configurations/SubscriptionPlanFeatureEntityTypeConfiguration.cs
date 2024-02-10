@@ -15,7 +15,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(x => x.Feature)
-                .HasMaxLength(50)
+                .HasMaxLength(80)
                 .IsRequired();
         }
     }
