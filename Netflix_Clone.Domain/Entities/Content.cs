@@ -30,5 +30,11 @@ namespace Netflix_Clone.Domain.Entities
 
         public IEnumerable<Actor> Actors { get; set; } = new List<Actor>();
         public IEnumerable<ContentActor> ContentsActors { get; set; } = new List<ContentActor>();
+
+        public IEnumerable<ApplicationUser> WatchedBy { get; set; } = new List<ApplicationUser>();
+        public IEnumerable<UserWatchHistory> UsersHistory { get; set; } = new List<UserWatchHistory>();
+
+        public IEnumerable<Tag> Tags { get; set; } = new List<Tag>();
+        public IEnumerable<ContentTag> ContentsTags { get; set; } = new List<ContentTag>();
     }
 }

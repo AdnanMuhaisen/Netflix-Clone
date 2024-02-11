@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240211044544_CongigureTheUserHistoryRelationship")]
+    partial class ConfigureTheUserHistoryRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -389,29 +392,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.ToTable("tbl_ContentLanguages", (string)null);
                 });
 
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentTag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ContentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContentId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("tbl_ContentsTags", (string)null);
-                });
-
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Person", b =>
                 {
                     b.Property<int>("Id")
@@ -537,24 +517,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.HasIndex("TVShowId");
 
                     b.ToTable("tbl_TVShowEpisodes", (string)null);
-                });
-
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("TagValue")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("tbl_Tags", (string)null);
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchHistory", b =>
@@ -728,25 +690,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("Content");
                 });
 
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentTag", b =>
-                {
-                    b.HasOne("Netflix_Clone.Domain.Entities.Content", "Content")
-                        .WithMany("ContentsTags")
-                        .HasForeignKey("ContentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Netflix_Clone.Domain.Entities.Tag", "Tag")
-                        .WithMany("ContentsTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Content");
-
-                    b.Navigation("Tag");
-                });
-
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.SubscriptionPlanSubscriptionPlanFeature", b =>
                 {
                     b.HasOne("Netflix_Clone.Domain.Entities.SubscriptionPlanFeature", "SubscriptionPlanFeature")
@@ -812,8 +755,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     b.Navigation("ContentsAwards");
 
-                    b.Navigation("ContentsTags");
-
                     b.Navigation("UsersHistory");
                 });
 
@@ -835,11 +776,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.SubscriptionPlanFeature", b =>
                 {
                     b.Navigation("SubscriptionPlansFeatures");
-                });
-
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.Tag", b =>
-                {
-                    b.Navigation("ContentsTags");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShow", b =>

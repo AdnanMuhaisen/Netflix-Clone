@@ -60,6 +60,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 l => l.HasOne(x => x.Actor).WithMany(x => x.ContentsActors).IsRequired(false),
                 l => l.HasOne(x => x.Content).WithMany(x => x.ContentsActors).IsRequired(true)
                 );
+
+            builder.HasMany(x => x.WatchedBy)
+                .WithMany(x => x.UserHistory)
+                .UsingEntity<UserWatchHistory>(
+                l => l.HasOne(x => x.ApplicationUser).WithMany(x => x.UsersHistory),
+                l => l.HasOne(x => x.Content).WithMany(x => x.UsersHistory)
+                );
+
+            builder.HasMany(x => x.Tags)
+                .WithMany(x => x.TagContents)
+                .UsingEntity<ContentTag>(
+                l => l.HasOne(x => x.Tag).WithMany(x => x.ContentsTags),
+                l => l.HasOne(x => x.Content).WithMany(x => x.ContentsTags).IsRequired()
+                );
         }
     }
 }

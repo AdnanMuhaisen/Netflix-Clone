@@ -13,7 +13,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240210150449_CofigureTheContentActorRelationship")]
-    partial class CofigureTheContentActorRelationship
+    partial class ConfigureTheContentActorRelationship
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

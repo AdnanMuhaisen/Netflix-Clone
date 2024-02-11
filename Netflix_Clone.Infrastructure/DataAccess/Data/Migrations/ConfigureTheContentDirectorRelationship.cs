@@ -5,7 +5,7 @@
 namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class CofigureTheContentDirectorRelationship : Migration
+    public partial class ConfigureTheContentDirectorRelationship : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
