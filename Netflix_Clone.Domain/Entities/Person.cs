@@ -1,11 +1,11 @@
 ﻿namespace Netflix_Clone.Domain.Entities
 {
-    public abstract class Person(int Id,string FirstName,string LastName,string? Email = null,string? ImageUrl = null)
+    public abstract class Person
     {
-        public int Id { get; init; } = Id;
-        public string FirstName { get; init; } = FirstName;
-        public string LastName { get; init; } = LastName;
-        public string? Email { get; init; } = Email;
-        public string? ImageUrl { get; init; } = ImageUrl;
+        public int Id { get; init; }
+        public string FirstName { get; init; } = string.Empty;
+        public string LastName { get; init; } = string.Empty;
+        public string? Email { get; init; }
+        public string? ImageUrl { get; init; } 
     }
 }

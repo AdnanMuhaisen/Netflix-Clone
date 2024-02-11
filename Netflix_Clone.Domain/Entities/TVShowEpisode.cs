@@ -1,10 +1,10 @@
 ﻿namespace Netflix_Clone.Domain.Entities
 {
-    public class TVShowEpisode(int Id,int LengthInMinutes,int SeasonNumber)
+    public class TVShowEpisode
     {
-        public int Id { get; init; } = Id;
-        public int LengthInMinutes { get; init; } = LengthInMinutes;
-        public int SeasonNumber { get; init; } = SeasonNumber;
+        public int Id { get; init; } 
+        public int LengthInMinutes { get; init; } 
+        public int SeasonNumber { get; init; } 
 
         //relationships
         public int TVShowId { get; set; }

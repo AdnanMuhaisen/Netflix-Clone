@@ -8,11 +8,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Content> builder)
         {
+            builder.ToTable("tbl_Contents");
 
             builder.HasKey(e => e.Id);
 
+            builder.Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+
             // inheritance mapping strategy
-            builder.UseTpcMappingStrategy();
+            builder.UseTphMappingStrategy();
 
             builder.Property(x => x.Title)
                 .HasMaxLength(50)
@@ -27,7 +31,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 .IsRequired(true);
 
             builder.Property(x => x.Location)
-                .HasMaxLength(40)
+                .HasMaxLength(100)
                 .IsRequired(true);
 
             //relationships
@@ -44,15 +48,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 l => l.HasOne(x => x.Content).WithMany(x => x.ContentsAwards).IsRequired(false)
                 );
 
-            builder.HasOne(x => x.Genre)
-                .WithMany(x => x.GenreContents)
-                .HasForeignKey(x => x.GenreId)
-                .IsRequired();
+            //builder.HasOne(x => x.Genre)
+            //    .WithMany(x => x.GenreContents)
+            //    .HasForeignKey(x => x.GenreId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.Director)
-                .WithMany(x => x.Contents)
-                .HasForeignKey(x => x.DirectorId)
-                .IsRequired();
+            //builder.HasOne(x => x.Director)
+            //    .WithMany(x => x.Contents)
+            //    .HasForeignKey(x => x.DirectorId)
+            //    .IsRequired()
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(x => x.Actors)
                 .WithMany(x => x.Contents)

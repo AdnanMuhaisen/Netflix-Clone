@@ -8,10 +8,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Movie> builder)
         {
-            builder.ToTable("tbl_Movies");
+            //builder.ToTable("tbl_Movies");
 
-            builder.Property(e => e.Id)
-                .ValueGeneratedOnAdd();
+            //builder.Property(e => e.Id)
+            //    .ValueGeneratedOnAdd();
         }
     }
 }

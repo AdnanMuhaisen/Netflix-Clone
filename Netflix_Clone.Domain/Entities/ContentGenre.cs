@@ -1,9 +1,9 @@
 ﻿namespace Netflix_Clone.Domain.Entities
 {
-    public class ContentGenre(int Id,string Genre)
+    public class ContentGenre
     {
-        public int Id { get; init; } = Id;
-        public string Genre { get; init; } = Genre;
+        public int Id { get; init; }
+        public string Genre { get; init; } = string.Empty;
 
         //relationships
 

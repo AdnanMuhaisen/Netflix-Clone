@@ -1,9 +1,9 @@
 ﻿namespace Netflix_Clone.Domain.Entities
 {
-    public class Tag(int Id,string TagValue)
+    public class Tag
     {
-        public int Id { get; init; } = Id;
-        public string TagValue { get; init; } = TagValue;
+        public int Id { get; init; }
+        public string TagValue { get; init; } = string.Empty;
 
 
         //relationships

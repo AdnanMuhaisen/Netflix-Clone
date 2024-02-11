@@ -2,17 +2,16 @@
 
 namespace Netflix_Clone.Domain.Entities
 {
-    public abstract class Content(int Id,string Title,int ReleaseYear,int MinimumAgeToWatch, string Synopsis,string Location)
+    public abstract class Content
     {
-        public int Id { get; init; } = Id;
-        public string Title { get; init; } = Title;
-        public int ReleaseYear { get; init; } = ReleaseYear;
-        public int MinimumAgeToWatch { get; init; } = MinimumAgeToWatch;
-        public string Synopsis { get; init; } = Synopsis;
-        public string Rating { get; } = $"Recommended for ages {MinimumAgeToWatch} and up";
+        public int Id { get; set; }
+        public string Title { get; init; } = string.Empty;
+        public int ReleaseYear { get; init; }
+        public int MinimumAgeToWatch { get; init; }
+        public string Synopsis { get; init; } = string.Empty;
+        public string Rating { get; init; } = string.Empty;
 
-        [Url]
-        public string Location { get; init; } = Location;
+        public string Location { get; set; } = string.Empty;
 
         //relationships
 
@@ -22,11 +21,12 @@ namespace Netflix_Clone.Domain.Entities
         public IEnumerable<Award> ContentAwards { get; set; } = new List<Award>();
         public IEnumerable<ContentAward> ContentsAwards { get; set; } = new List<ContentAward>();
 
-        public int GenreId { get; set; }
-        public ContentGenre Genre { get; set; }
+        public int ContentGenreId { get; set; }
+        //public ContentGenre Genre { get; set; }
+
 
         public int DirectorId { get; set; }
-        public Director Director { get; set; }
+        //public Director Director { get; set; }
 
         public IEnumerable<Actor> Actors { get; set; } = new List<Actor>();
         public IEnumerable<ContentActor> ContentsActors { get; set; } = new List<ContentActor>();

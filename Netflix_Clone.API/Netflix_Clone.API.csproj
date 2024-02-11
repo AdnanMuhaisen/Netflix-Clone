@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <UserSecretsId>9f18789f-8cc9-48c8-ba7b-b94daac90bbc</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +16,11 @@
     <ProjectReference Include="..\Netflix_Clone.Domain\Netflix_Clone.Domain.csproj" />
     <ProjectReference Include="..\Netflix_Clone.Infrastructure\Netflix_Clone.Infrastructure.csproj" />
     <ProjectReference Include="..\Netflix_Clone.SharedPackages\Netflix_Clone.SharedPackages.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Content\Movies\CompressedMovies\" />
+    <Folder Include="wwwroot\Content\TV-Shows\" />
   </ItemGroup>
 
 </Project>

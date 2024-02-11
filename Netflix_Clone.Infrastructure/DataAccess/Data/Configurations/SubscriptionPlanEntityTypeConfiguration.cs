@@ -31,6 +31,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 l => l.HasOne(x => x.SubscriptionPlan).WithMany(x => x.SubscriptionPlansFeatures).IsRequired(true)
                 );
 
+            builder.HasMany(x => x.PlanUsers)
+                .WithMany(x => x.SubscriptionPlans)
+                .UsingEntity<UserSubscriptionPlan>(
+                l => l.HasOne(x => x.ApplicationUser).WithMany(x => x.UsersSubscriptionPlans),
+                l => l.HasOne(x => x.SubscriptionPlan).WithMany(x => x.UsersSubscriptionPlans)
+                );
             #endregion
         }
     }

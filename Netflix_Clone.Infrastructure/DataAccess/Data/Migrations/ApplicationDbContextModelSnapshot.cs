@@ -22,8 +22,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.HasSequence("ContentSequence");
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -254,24 +252,28 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("NEXT VALUE FOR [ContentSequence]");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ContentGenreId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DirectorId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("int");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("MinimumAgeToWatch")
                         .HasColumnType("int");
@@ -296,15 +298,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DirectorId");
+                    b.HasIndex("ContentGenreId");
 
-                    b.HasIndex("GenreId");
+                    b.HasIndex("DirectorId");
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable((string)null);
+                    b.ToTable("tbl_Contents", (string)null);
 
-                    b.UseTpcMappingStrategy();
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Content");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentActor", b =>
@@ -557,6 +561,34 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.ToTable("tbl_Tags", (string)null);
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserSubscriptionPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SubscriptionPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("SubscriptionPlanId");
+
+                    b.ToTable("tbl_UsersSubscriptions", (string)null);
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -588,7 +620,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Property<int>("LengthInMinutes")
                         .HasColumnType("int");
 
-                    b.ToTable("tbl_Movies", (string)null);
+                    b.HasDiscriminator().HasValue("Movie");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShow", b =>
@@ -601,7 +633,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Property<int>("TotalNumberOfSeasons")
                         .HasColumnType("int");
 
-                    b.ToTable("tbl_TVShows", (string)null);
+                    b.HasDiscriminator().HasValue("TVShow");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Actor", b =>
@@ -671,15 +703,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Content", b =>
                 {
-                    b.HasOne("Netflix_Clone.Domain.Entities.Director", "Director")
-                        .WithMany("Contents")
-                        .HasForeignKey("DirectorId")
+                    b.HasOne("Netflix_Clone.Domain.Entities.ContentGenre", null)
+                        .WithMany("GenreContents")
+                        .HasForeignKey("ContentGenreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Netflix_Clone.Domain.Entities.ContentGenre", "Genre")
-                        .WithMany("GenreContents")
-                        .HasForeignKey("GenreId")
+                    b.HasOne("Netflix_Clone.Domain.Entities.Director", null)
+                        .WithMany("Contents")
+                        .HasForeignKey("DirectorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -690,10 +722,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ContentLanguage");
-
-                    b.Navigation("Director");
-
-                    b.Navigation("Genre");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentActor", b =>
@@ -777,6 +805,25 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("TVShow");
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserSubscriptionPlan", b =>
+                {
+                    b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("UsersSubscriptionPlans")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Netflix_Clone.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                        .WithMany("UsersSubscriptionPlans")
+                        .HasForeignKey("SubscriptionPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("SubscriptionPlan");
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchHistory", b =>
                 {
                     b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
@@ -799,6 +846,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("UsersHistory");
+
+                    b.Navigation("UsersSubscriptionPlans");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Award", b =>
@@ -830,6 +879,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.SubscriptionPlan", b =>
                 {
                     b.Navigation("SubscriptionPlansFeatures");
+
+                    b.Navigation("UsersSubscriptionPlans");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.SubscriptionPlanFeature", b =>

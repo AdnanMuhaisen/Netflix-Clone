@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Netflix_Clone.SharedPackages\Netflix_Clone.SharedPackages.csproj" />
   </ItemGroup>
 

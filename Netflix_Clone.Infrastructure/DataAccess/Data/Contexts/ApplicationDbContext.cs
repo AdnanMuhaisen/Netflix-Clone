@@ -27,13 +27,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<TVShow> TVShows { get; set; }
         public DbSet<TVShowEpisode> TVShowEpisodes { get; set; }
 
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=.;Database = NetflixCloneDb; Integrated Security = SSPI; TrustServerCertificate = True;");
+            optionsBuilder.UseSqlServer("Server = .; Database =NetflixCloneDb; Integrated Security = SSPI; TrustServerCertificate = True;");
         }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

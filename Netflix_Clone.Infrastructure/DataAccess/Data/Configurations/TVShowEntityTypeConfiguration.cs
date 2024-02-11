@@ -8,10 +8,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<TVShow> builder)
         {
-            builder.ToTable("tbl_TVShows");
+            //builder.ToTable("tbl_TVShows");
 
-            builder.Property(e => e.Id)
-                .ValueGeneratedOnAdd();
+            //builder.Property(e => e.Id)
+            //    .ValueGeneratedOnAdd();
 
             //relationships
             builder.HasMany(x => x.Episodes)
