@@ -4,6 +4,8 @@ using Serilog;
 using Netflix_Clone.API.Extensions;
 using Netflix_Clone.Domain;
 using Netflix_Clone.Application.Services.FileOperations;
+using Netflix_Clone.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,11 +36,16 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddSerilog();
 });
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 //register db context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 
 //configure the mediator:
 builder.Services.AddMediatR(cfg =>
@@ -52,7 +59,6 @@ builder.Services.RegisterMapsterConfigurations();
 builder.Services.AddScoped<IFileCompressor, FileCompressor>();
 builder.Services.AddScoped<IFileManager, FileManager>();
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -64,6 +70,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

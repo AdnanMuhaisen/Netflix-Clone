@@ -104,7 +104,7 @@ namespace Netflix_Clone.API.Controllers
 
                 logger.LogTrace($"The {nameof(AddNewMovie)} executed successfully");
 
-                return Ok(result);
+                return Created("", result);
             }
             else
             {
