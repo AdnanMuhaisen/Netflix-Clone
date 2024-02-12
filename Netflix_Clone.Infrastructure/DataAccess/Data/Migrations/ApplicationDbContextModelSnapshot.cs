@@ -267,6 +267,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("nvarchar(8)");
 
+                    b.Property<bool>("IsAvailableToDownload")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int>("LanguageId")
                         .HasColumnType("int");
 
@@ -295,6 +300,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TotalNumberOfDownloads")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.HasKey("Id");
 

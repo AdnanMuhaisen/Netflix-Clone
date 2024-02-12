@@ -17,14 +17,14 @@ namespace Netflix_Clone.Application.Services.FileOperations
         /// <param name="DirectoryToCompressTo">Represents the directory that you want to save in it</param>
         /// <param name="NameOfTheTargetCompressedFile"></param>
         /// <returns></returns>
-        public void CompressFileTo(
+        public void CompressAndSaveFile(
             string PathOfTheTargetFileToCompress,
             string DirectoryToCompressTo,
             string NameOfTheTargetCompressedFile)
         {
             try
             {
-                logger.LogTrace($"The {nameof(CompressFileTo)} operation have been started");
+                logger.LogTrace($"The {nameof(CompressAndSaveFile)} operation have been started");
 
                 using FileStream originalFileStream = File.Open(PathOfTheTargetFileToCompress, FileMode.Open);
 
@@ -40,7 +40,7 @@ namespace Netflix_Clone.Application.Services.FileOperations
             }
             catch (Exception ex)
             {
-                logger.LogTrace($"An exception occur in {nameof(CompressFileTo)} due to this cause : {ex.Message}");
+                logger.LogTrace($"An exception occur in {nameof(CompressAndSaveFile)} due to this cause : {ex.Message}");
             }
         }
     }

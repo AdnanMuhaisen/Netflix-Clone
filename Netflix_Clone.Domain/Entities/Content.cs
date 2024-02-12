@@ -11,6 +11,10 @@ namespace Netflix_Clone.Domain.Entities
         public string Synopsis { get; init; } = string.Empty;
         public string Rating { get; init; } = string.Empty;
 
+        public int TotalNumberOfDownloads { get; set; }
+        public bool IsAvailableToDownload { get; set; }
+
+
         public string Location { get; set; } = string.Empty;
 
         //relationships

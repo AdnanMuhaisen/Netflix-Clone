@@ -4,6 +4,6 @@ namespace Netflix_Clone.Application.Services.FileOperations
 {
     public interface IFileCompressor : IScopedService
     {
-        void CompressFileTo(string PathOfTheTargetFileToCompress, string CompressTo, string NameOfTheTargetCompressedFile);
+        void CompressAndSaveFile(string PathOfTheAddedFileToCompress, string CompressToDirectory, string NameOfTheTargetCompressedFile);
     }
 }

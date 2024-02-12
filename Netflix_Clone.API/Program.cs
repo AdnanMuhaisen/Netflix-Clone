@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //configure the options:
-builder.Services.Configure<ContentOptions>(builder.Configuration.GetSection("Content:Movies"));
+builder.Services.Configure<ContentMovieOptions>(builder.Configuration.GetSection("Content:Movies"));
 
 
 //app services:
@@ -50,6 +50,7 @@ builder.Services.RegisterMapsterConfigurations();
 
 
 builder.Services.AddScoped<IFileCompressor, FileCompressor>();
+builder.Services.AddScoped<IFileManager, FileManager>();
 
 
 var app = builder.Build();

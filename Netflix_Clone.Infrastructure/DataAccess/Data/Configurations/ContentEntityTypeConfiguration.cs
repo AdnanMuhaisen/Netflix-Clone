@@ -34,6 +34,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired(true);
 
+            builder.Property(x => x.TotalNumberOfDownloads)
+                .HasDefaultValue(0)
+                .IsRequired(true);
+
+            builder.Property(x => x.IsAvailableToDownload)
+                .HasDefaultValue(true)
+                .IsRequired(true);
+
             //relationships
 
             builder.HasOne(x => x.ContentLanguage)
