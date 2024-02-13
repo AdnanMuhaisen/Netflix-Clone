@@ -1,6 +1,4 @@
-﻿using Netflix_Clone.Application.Services.IServices;
-
-namespace Netflix_Clone.Application.Services.FileOperations
+﻿namespace Netflix_Clone.Application.Services.IServices
 {
     public interface IFileManager : IScopedService
     {

@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Netflix_Clone.Application.Services.FileOperations;
+using Netflix_Clone.Application.Services.IServices;
 using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Entities;

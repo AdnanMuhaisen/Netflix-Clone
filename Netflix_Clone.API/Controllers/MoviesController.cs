@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.Checkers;
@@ -11,6 +12,7 @@ using Netflix_Clone.Infrastructure.DataAccess.Queries;
 
 namespace Netflix_Clone.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class MoviesController : BaseController<MoviesController>

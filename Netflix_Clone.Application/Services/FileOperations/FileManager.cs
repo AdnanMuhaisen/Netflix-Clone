@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Netflix_Clone.Application.Services.IServices;
 using Netflix_Clone.Domain;
 
 namespace Netflix_Clone.Application.Services.FileOperations

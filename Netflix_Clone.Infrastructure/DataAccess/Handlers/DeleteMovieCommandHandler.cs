@@ -5,8 +5,8 @@ using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Domain.Exceptions;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain;
-using Netflix_Clone.Application.Services.FileOperations;
 using System.Text;
+using Netflix_Clone.Application.Services.IServices;
 
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers

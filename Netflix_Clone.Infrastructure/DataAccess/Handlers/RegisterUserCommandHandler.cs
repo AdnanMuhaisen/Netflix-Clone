@@ -1,36 +1,38 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Entities;
+using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
     public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, RegistrationResponseDto>
     {
         private readonly ILogger<RegisterUserCommandHandler> logger;
-        private readonly ApplicationDbContext applicationDbContext;
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IOptions<UserRolesOptions> options;
 
         public RegisterUserCommandHandler(ILogger<RegisterUserCommandHandler> logger,
-            ApplicationDbContext applicationDbContext,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager
+            IOptions<UserRolesOptions> options
             )
         {
             this.logger = logger;
-            this.applicationDbContext = applicationDbContext;
             this.userManager = userManager;
-            this.roleManager = roleManager;
+            this.options = options;
         }
 
         public async Task<RegistrationResponseDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
+            logger.LogTrace("The registration command handler is start to execute");
+
             if(await userManager.FindByEmailAsync(request.registrationRequestDto.Email) is not null)
             {
+                logger.LogError("The user with email : {email} is already exist", request.registrationRequestDto.Email);
+
                 return new RegistrationResponseDto
                 {
                     IsRegistered = false,
@@ -39,18 +41,81 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             }
 
             // name => username in the table
-            if(await userManager.FindByNameAsync($"{request.registrationRequestDto.FirstName} {request.registrationRequestDto.FirstName}") is not null)
+            if(await userManager.FindByNameAsync($"{request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName}") is not null)
             {
+                logger.LogError("The user with Name : {name} is already exist",
+                    $"{request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName}");
+                
                 return new RegistrationResponseDto
                 {
                     IsRegistered = false,
-                    Message = $"The user with the UserName : {request.registrationRequestDto.FirstName} {request.registrationRequestDto.FirstName} is already exist"
+                    Message = $"The user with the UserName : {request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName} is already exist"
                 };
             }
 
             // add the user :
+            var userCreationResult = await userManager.CreateAsync(new ApplicationUser
+            {
+                FirstName = request.registrationRequestDto.FirstName,
+                LastName = request.registrationRequestDto.LastName,
+                Email = request.registrationRequestDto.Email,
+                UserName = $"{request.registrationRequestDto.FirstName}{request.registrationRequestDto.LastName}",
+                PhoneNumber = request.registrationRequestDto.PhoneNumber,
+                NormalizedUserName = $"{request.registrationRequestDto.FirstName}{request.registrationRequestDto.LastName}".ToUpper(),
+                NormalizedEmail = request.registrationRequestDto.Email.ToUpper()
+            }, request.registrationRequestDto.Password);
 
-            return null;
+            if (!userCreationResult.Succeeded)
+            {
+                logger.LogError("An error occur while saving the user with email : {email}",
+                    request.registrationRequestDto.Email);
+
+                return new RegistrationResponseDto
+                {
+                    IsRegistered = false,
+                    Message = string.Join(',', userCreationResult.Errors.Select(x => x.Description))
+                };
+            }
+
+            logger.LogTrace("The user is added successfully");
+
+            var registeredUser = await userManager.FindByEmailAsync(request.registrationRequestDto.Email);
+
+            if(registeredUser is null)
+            {
+                logger.LogError("An Error occur while finding the user with email : {email} ", request.registrationRequestDto.Email);
+
+                return new RegistrationResponseDto
+                {
+                    IsRegistered = false,
+                    Message = "Can not find the user after it is added successfully"
+                };
+            }
+
+            var addToRoleResult = await userManager.AddToRoleAsync(registeredUser, options.Value.ApplicationUser);
+
+            if(!addToRoleResult.Succeeded)
+            {
+                logger.LogError("An Error occur while adding the user with id : {id} to the USER role", registeredUser.Id);
+
+                return new RegistrationResponseDto
+                {
+                    IsRegistered = true,
+                    Message = $"The user is registered successfully ,but can not add this user to role due to " +
+                    $"this errors : {string.Join(',', addToRoleResult.Errors.Select(x => x.Description))}"
+                };
+            }
+
+            logger.LogTrace("The user with id : {id} is added to the USER Role Successfully", registeredUser.Id);
+
+            return new RegistrationResponseDto
+            {
+                UserId = registeredUser.Id,
+                UserName = registeredUser.UserName!,
+                Email = registeredUser.Email!,
+                IsRegistered = true,
+                Message = "Registered successfully"
+            };
         }
     }
 }
