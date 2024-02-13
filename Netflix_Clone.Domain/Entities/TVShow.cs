@@ -3,10 +3,12 @@
     public class TVShow : Content
         
     {
-        public int TotalNumberOfEpisodes { get; set; } 
-        public int TotalNumberOfSeasons { get; set; } 
+        public int TotalNumberOfSeasons { get; set; }
+
+        //denormalization
+        public int TotalNumberOfEpisodes { get; set; }
 
         //relationships
-        public IEnumerable<TVShowEpisode> Episodes { get; set; } = new List<TVShowEpisode>();
+        public IEnumerable<TVShowSeason> Seasons { get; set; } = new List<TVShowSeason>();
     }
 }

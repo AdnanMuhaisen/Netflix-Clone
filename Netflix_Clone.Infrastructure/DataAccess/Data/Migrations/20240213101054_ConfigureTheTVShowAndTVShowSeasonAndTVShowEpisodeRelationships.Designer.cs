@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240213101054_ConfigureTheTVShowAndTVShowSeasonAndTVShowEpisodeRelationships")]
+    partial class ConfigureTheTVShowAndTVShowSeasonAndTVShowEpisodeRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -537,16 +540,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EpisodeNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("LengthInMinutes")
                         .HasColumnType("int");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SeasonId")
                         .HasColumnType("int");

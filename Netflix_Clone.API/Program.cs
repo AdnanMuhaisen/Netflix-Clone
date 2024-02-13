@@ -50,6 +50,7 @@ builder.Services.AddSwaggerGen(options =>
 
 //configure the options:
 builder.Services.Configure<ContentMovieOptions>(builder.Configuration.GetSection("Content:Movies"));
+builder.Services.Configure<ContentTVShowOptions>(builder.Configuration.GetSection("Content:TVShows"));
 builder.Services.Configure<UserRolesOptions>(builder.Configuration.GetSection("UserRoles"));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 

@@ -14,11 +14,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
             //    .ValueGeneratedOnAdd();
 
             //relationships
-            builder.HasMany(x => x.Episodes)
+            builder.HasMany(x => x.Seasons)
                 .WithOne(x => x.TVShow)
                 .HasForeignKey(x => x.TVShowId)
-                .IsRequired();
-
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

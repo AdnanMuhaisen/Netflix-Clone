@@ -25,6 +25,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; set; }
         public DbSet<SubscriptionPlanSubscriptionPlanFeature> SubscriptionPlansFeatures { get; set; }
         public DbSet<TVShow> TVShows { get; set; }
+        public DbSet<TVShowSeason> TVShowsSeasons { get; set; }
         public DbSet<TVShowEpisode> TVShowEpisodes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -4,10 +4,15 @@
     {
         public int Id { get; init; } 
         public int LengthInMinutes { get; init; } 
-        public int SeasonNumber { get; init; } 
+        public int SeasonNumber { get; init; }
+        public int EpisodeNumber { get; init; }
+        public string Location { get; set; } = string.Empty;
 
         //relationships
         public int TVShowId { get; set; }
         public TVShow TVShow { get; set; } = default!;
+
+        public int SeasonId { get; set; }
+        public TVShowSeason Season { get; set; } = default!;
     }
 }

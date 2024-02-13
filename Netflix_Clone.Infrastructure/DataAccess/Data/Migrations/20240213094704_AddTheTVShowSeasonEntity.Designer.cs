@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240213094704_AddTheTVShowSeasonEntity")]
+    partial class AddTheTVShowSeasonEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -537,18 +540,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EpisodeNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("LengthInMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("SeasonId")
                         .HasColumnType("int");
 
                     b.Property<int>("SeasonNumber")
@@ -558,8 +550,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SeasonId");
 
                     b.HasIndex("TVShowId");
 
@@ -581,15 +571,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Property<int>("SeasonNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("TVShowId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TotalNumberOfEpisodes")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TVShowId");
 
                     b.ToTable("tbl_TVShowSeason", (string)null);
                 });
@@ -847,27 +832,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShowEpisode", b =>
                 {
-                    b.HasOne("Netflix_Clone.Domain.Entities.TVShowSeason", "Season")
+                    b.HasOne("Netflix_Clone.Domain.Entities.TVShow", "TVShow")
                         .WithMany("Episodes")
-                        .HasForeignKey("SeasonId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Netflix_Clone.Domain.Entities.TVShow", "TVShow")
-                        .WithMany()
-                        .HasForeignKey("TVShowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Season");
-
-                    b.Navigation("TVShow");
-                });
-
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShowSeason", b =>
-                {
-                    b.HasOne("Netflix_Clone.Domain.Entities.TVShow", "TVShow")
-                        .WithMany("Seasons")
                         .HasForeignKey("TVShowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -958,11 +924,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("SubscriptionPlansFeatures");
                 });
 
-            modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShowSeason", b =>
-                {
-                    b.Navigation("Episodes");
-                });
-
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Tag", b =>
                 {
                     b.Navigation("ContentsTags");
@@ -970,7 +931,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShow", b =>
                 {
-                    b.Navigation("Seasons");
+                    b.Navigation("Episodes");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Actor", b =>

@@ -1,0 +1,41 @@
+﻿using Mapster;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Netflix_Clone.Domain.DTOs;
+using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
+using Netflix_Clone.Infrastructure.DataAccess.Queries;
+
+namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
+{
+    public class GetTVShowSeasonEpisodesQueryHandler 
+        : IRequestHandler<GetTVShowSeasonEpisodesQuery, IEnumerable<TVShowEpisodeDto>>
+    {
+        private readonly ILogger<GetTVShowSeasonEpisodesQueryHandler> logger;
+        private readonly ApplicationDbContext applicationDbContext;
+
+        public GetTVShowSeasonEpisodesQueryHandler(ILogger<GetTVShowSeasonEpisodesQueryHandler> logger,
+            ApplicationDbContext applicationDbContext)
+        {
+            this.logger = logger;
+            this.applicationDbContext = applicationDbContext;
+        }
+
+        public async Task<IEnumerable<TVShowEpisodeDto>> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
+        {
+            var episodes = applicationDbContext
+                .TVShowEpisodes
+                .Where(x => x.TVShowId == request.tVShowSeasonEpisodesRequestDto.TVShowId
+                && x.SeasonId == request.tVShowSeasonEpisodesRequestDto.TVShowSeasonId);
+
+            if(episodes is null)
+            {
+                return Enumerable.Empty<TVShowEpisodeDto>();
+            }
+
+            return await episodes
+                .ProjectToType<TVShowEpisodeDto>()
+                .ToListAsync();
+        }
+    }
+}
