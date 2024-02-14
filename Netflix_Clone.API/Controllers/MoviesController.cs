@@ -9,12 +9,13 @@ using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Infrastructure.DataAccess.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Queries;
+using System.Security.Claims;
 
 namespace Netflix_Clone.API.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class MoviesController : BaseController<MoviesController>
     {
         private readonly IMediator mediator;
@@ -67,6 +68,7 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST")]
+        [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
         public async Task<ActionResult<MovieDto>> AddNewMovie([FromBody] MovieToInsertDto movieToInsertDto)
         {
             logger.LogTrace($"{nameof(AddNewMovie)} is executing");
@@ -119,6 +121,7 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpDelete]
         [Route("DELETE/{ContentId:int}")]
+        [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
         public async Task<ActionResult> DeleteMovie(int ContentId)
         {
             var deleteMovieCommand = new DeleteMovieCommand(ContentId);
@@ -141,6 +144,7 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPut]
         [Route("PUT")]
+        [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
         public async Task<ActionResult<MovieDto>> UpdateMovieInfo([FromBody] MovieDto movieDto)
         {
             var command = new UpdateMovieCommand(movieDto);
@@ -170,6 +174,18 @@ namespace Netflix_Clone.API.Controllers
                 var targetMovie = await mediator.Send(query);
 
                 logger.LogTrace("The move with id : {id} is retrieved successfully", targetMovie.Id);
+
+                //add to user history if the user role is user:
+                if(User.Claims.First(c=>c.Type == ClaimTypes.Role).Value == USER_ROLE)
+                {
+                    var addToUserHistoryCommand = new AddToUserWatchHistoryCommand(new AddToUserWatchHistoryRequestDto
+                    {
+                        ApplicationUserId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+                        ContentId = ContentId
+                    });
+
+                    var result = await mediator.Send(addToUserHistoryCommand);
+                }
 
                 return Ok(targetMovie);
             }

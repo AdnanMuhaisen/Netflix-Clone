@@ -37,7 +37,7 @@ namespace Netflix_Clone.Application.Services
             {
                 Audience = options.Value.Audience,
                 Issuer = options.Value.Issuer,
-                Expires = DateTime.UtcNow.AddDays(1),
+                Expires = DateTime.UtcNow.AddDays(options.Value.ExpiresAfterDays),
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

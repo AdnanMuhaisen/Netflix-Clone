@@ -59,7 +59,24 @@ namespace Netflix_Clone.API.Controllers
             {
                 return BadRequest("Invalid Model State");
             }
-        } 
+        }
+
+
+        [HttpDelete]
+        [Route("DELETE/DeleteSeasonEpisode")]
+        public async Task<ActionResult<DeletionResultDto>> DeleteSeasonEpisode([FromBody] TVShowSeasonEpisodeToDeleteDto tVShowSeasonEpisodeToDeleteDto)
+        {
+            if (ModelState.IsValid)
+            {
+                var command = new DeleteSeasonEpisodeCommand(tVShowSeasonEpisodeToDeleteDto);
+                var result = await mediator.Send(command);
+                return (result.IsDeleted) ? NoContent() : BadRequest(result);
+            }
+            else
+            {
+                return BadRequest("Invalid Model State");
+            }
+        }
 
 
     }

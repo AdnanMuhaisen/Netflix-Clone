@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Queries;
@@ -12,12 +14,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
     {
         private readonly ILogger<GetMovieQuery> logger;
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly IOptions<ContentMovieOptions> options;
 
         public GetMovieQueryHandler(ILogger<GetMovieQuery> logger,
-            ApplicationDbContext applicationDbContext)
+            ApplicationDbContext applicationDbContext,
+            IOptions<ContentMovieOptions> options)
         {
             this.logger = logger;
             this.applicationDbContext = applicationDbContext;
+            this.options = options;
         }
 
         public async Task<MovieDto> Handle(GetMovieQuery request, CancellationToken cancellationToken)
@@ -32,8 +37,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             logger.LogTrace("The movie is retrieved successfully");
 
-            targetMovieToRetrieve.Location = Encoding.UTF8.GetString(Convert.FromBase64String(targetMovieToRetrieve.Location));
-           
+            //decode the movie location
+            targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo, targetMovieToRetrieve.Location);
+            //targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo,
+            //    Encoding.UTF8.GetString(Convert.FromBase64String(targetMovieToRetrieve.Location)));
+
             return targetMovieToRetrieve.Adapt<MovieDto>(); ;
         }
     }

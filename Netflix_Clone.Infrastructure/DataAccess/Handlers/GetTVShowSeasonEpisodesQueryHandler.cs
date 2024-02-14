@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Queries;
+using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
@@ -23,19 +24,21 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
         public async Task<IEnumerable<TVShowEpisodeDto>> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
         {
-            var episodes = applicationDbContext
+            var episodes = await applicationDbContext
                 .TVShowEpisodes
                 .Where(x => x.TVShowId == request.tVShowSeasonEpisodesRequestDto.TVShowId
-                && x.SeasonId == request.tVShowSeasonEpisodesRequestDto.TVShowSeasonId);
+                && x.SeasonId == request.tVShowSeasonEpisodesRequestDto.TVShowSeasonId)
+                .ToListAsync();            
 
             if(episodes is null)
             {
                 return Enumerable.Empty<TVShowEpisodeDto>();
             }
 
-            return await episodes
-                .ProjectToType<TVShowEpisodeDto>()
-                .ToListAsync();
+            foreach (var episode in episodes)
+                episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));
+
+            return episodes.Adapt<List<TVShowEpisodeDto>>();
         }
     }
 }

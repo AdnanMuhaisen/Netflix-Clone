@@ -90,6 +90,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             //save to the database
             var seasonToAdd = request.tVShowSeasonToInsertDto.Adapt<TVShowSeason>();
 
+            seasonToAdd.DirectoryName = Convert.ToBase64String(Encoding.UTF8.GetBytes(targetSeasonDirectoryName.ToString()));
+
             ArgumentNullException.ThrowIfNull(seasonToAdd);
 
             try

@@ -32,28 +32,27 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
-                .FindAsync(request.TVShowEpisodeToInsertDto.TVShowId);
+                .Include(x=>x.Seasons)
+                .ThenInclude(i=>i.Episodes)
+                .FirstOrDefaultAsync(x => x.Id == request.TVShowEpisodeToInsertDto.TVShowId);
 
             if(targetTVShow is null)
             {
                 throw new InsertionException($"The target TV Show with Id: {request.TVShowEpisodeToInsertDto.TVShowId} does not exist !");
             }
 
-            var targetSeason = await applicationDbContext
-                .TVShowsSeasons
-                .FindAsync(request.TVShowEpisodeToInsertDto.SeasonId);
+            var targetSeason = targetTVShow
+                .Seasons
+                .FirstOrDefault(x => x.Id == request.TVShowEpisodeToInsertDto.SeasonId);
 
             if (targetSeason is null)
             {
                 throw new InsertionException($"The target TV Show season with Id: {request.TVShowEpisodeToInsertDto.SeasonId} does not exist !");
             }
 
-            var IsTargetEpisodeExist = await applicationDbContext
-                .TVShowEpisodes
-                .Where(x => x.TVShowId == request.TVShowEpisodeToInsertDto.TVShowId
-                && x.SeasonId == request.TVShowEpisodeToInsertDto.SeasonId
-                && x.EpisodeNumber == request.TVShowEpisodeToInsertDto.EpisodeNumber)
-                .AnyAsync();
+            var IsTargetEpisodeExist = targetSeason
+                .Episodes
+                .Any(x => x.EpisodeNumber == request.TVShowEpisodeToInsertDto.EpisodeNumber);
 
             if (IsTargetEpisodeExist)
             {
@@ -73,11 +72,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 throw new InsertionException($"The directory of the target TV Show with id {request.TVShowEpisodeToInsertDto.TVShowId} does not exist");
             }
 
-            string episodeFilePath = Path.Combine(pathOfTheTVShowDirectory,
+            var pathOfTheTargetSeason = new StringBuilder(Path.Combine(pathOfTheTVShowDirectory,
+                Encoding.UTF8.GetString(Convert.FromBase64String(targetSeason.DirectoryName))));
+
+            if (!Directory.Exists(pathOfTheTargetSeason.ToString()))
+            {
+                throw new InsertionException($"The directory of the target TV Show season with id {request.TVShowEpisodeToInsertDto.SeasonId} does not exist");
+            }
+
+            string episodeFilePath = Path.Combine(pathOfTheTargetSeason.ToString(),
                 $"{targetTVShow.Title}" +
                 $"-{targetSeason.SeasonNumber}" +
-                $"-{request.TVShowEpisodeToInsertDto.SeasonNumber}");
-            
+                $"-{request.TVShowEpisodeToInsertDto.EpisodeNumber}") 
+                + Path.GetExtension(request.TVShowEpisodeToInsertDto.Location);
+
             if(File.Exists(episodeFilePath))
             {
                 throw new InsertionException($"The episode of the TVShow with id : {targetTVShow.Id}" +
@@ -97,18 +105,29 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             //save to the database:
             var episodeToInsert = request.TVShowEpisodeToInsertDto.Adapt<TVShowEpisode>();
-            episodeToInsert.Location = episodeFilePath.Split('\\').Last();
-            episodeToInsert.Location = Convert.ToBase64String(Encoding.UTF8.GetBytes(episodeToInsert.Location));
+            //this the location of the episode file / file name
+            episodeToInsert.FileName = episodeFilePath.Split('\\').Last();
+            episodeToInsert.FileName = Convert.ToBase64String(Encoding.UTF8.GetBytes(episodeToInsert.FileName));
 
             try
             {
-                await applicationDbContext.TVShowEpisodes.AddAsync(episodeToInsert);
+                targetSeason.Episodes.Add(episodeToInsert);
+
+                //applicationDbContext.Entry(episodeToInsert.TVShow).State = EntityState.Detached;  
+
+                targetSeason.TotalNumberOfEpisodes++;
+                targetTVShow.TotalNumberOfEpisodes++;
+
+                var attachedEntities = applicationDbContext.ChangeTracker.Entries();
+
                 await applicationDbContext.SaveChangesAsync();
 
                 return episodeToInsert.Adapt<TVShowEpisodeDto>();
             }
             catch(Exception ex)
             {
+                File.Delete(episodeFilePath);
+
                 throw new InsertionException($"{ex.Message}");
             }
         }

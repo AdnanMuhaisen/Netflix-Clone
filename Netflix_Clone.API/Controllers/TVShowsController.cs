@@ -42,7 +42,7 @@ namespace Netflix_Clone.API.Controllers
                 }
                 catch (Exception ex) 
                 {
-                    return BadRequest(ex);
+                    return BadRequest(ex.Message);
                 }
             }
             else
@@ -51,6 +51,31 @@ namespace Netflix_Clone.API.Controllers
             }
         }
 
+        [HttpDelete]
+        [Route("DELETE/{TVShowId:int}")]
+        public async Task<ActionResult<DeletionResultDto>> DeleteTVShow([FromRoute] int TVShowId)
+        {
+            // there`s a cascade delete between the tbl_TVShows table and the tbl_TVShowSeasons table 
+            // but to avoid the cycles or multiple cascade paths problem : i have created a trigger 
+            // to delete the season episodes when the season is deleted.
+
+            var command = new DeleteTVShowCommand(TVShowId);
+            var result = await mediator.Send(command);
+            return (result.IsDeleted)
+                ? NoContent()
+                : BadRequest(result);
+        }
+
+        [HttpGet]
+        [Route("GET/{TVShowId:int}")]
+        public async Task<ActionResult<ApiResponseDto>> GetTVShow(int TVShowId)
+        {
+            var query = new GetTVShowQuery(TVShowId);
+            var result = await mediator.Send(query);
+            return (result is null)
+                ? NotFound(new ApiResponseDto { Result = result! })
+                : Ok(new ApiResponseDto { Result = result });
+        }
 
 
 

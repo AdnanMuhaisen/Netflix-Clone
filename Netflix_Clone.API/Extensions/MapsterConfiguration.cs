@@ -61,6 +61,12 @@ namespace Netflix_Clone.API.Extensions
                 })
                 .TwoWays();
 
+            TypeAdapterConfig<TVShowEpisode, TVShowEpisodeToInsertDto>
+                .NewConfig()
+                .Map(dest => dest.Location, src => src.FileName)
+                .TwoWays();
+
+
             TypeAdapterConfig.GlobalSettings.Scan(AppDomain.CurrentDomain.GetAssemblies());
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Netflix_Clone.Application.Services.IServices;
@@ -41,8 +40,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             var userRoles = await userManager.GetRolesAsync(user);
             string token = jwtTokenGenerator.GenerateToken(user, userRoles);
 
-            //await IdentitySignInAsync(user, token, request.httpContext);
-
             return new LoginResponseDto
             {
                 UserDto = user.Adapt<ApplicationUserDto>(),
@@ -56,7 +53,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(Token);
 
-            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity();
             identity.AddClaims(new Claim[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub,
@@ -68,6 +65,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 new Claim(JwtRegisteredClaimNames.Name,
                 jwtToken.Claims.First(x=>x.Type == JwtRegisteredClaimNames.Name).Value),
             });
+
+
             foreach (var claim in jwtToken.Claims.Where(x=>x.Type == "role"))
             {
                 identity.AddClaim(new Claim("role", claim.Value));
@@ -76,9 +75,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             var principal = new ClaimsPrincipal(identity);
 
-            await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            await httpContext.SignInAsync(IdentityConstants.ExternalScheme, principal);
         }
-
-
     }
 }

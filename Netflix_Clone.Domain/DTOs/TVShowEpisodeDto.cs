@@ -7,7 +7,7 @@
         public int SeasonNumber { get; init; }
         public int EpisodeNumber { get; init; }
         public int TVShowId { get; set; }
-        public string Location { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
         public int SeasonId { get; set; }
     }
 }

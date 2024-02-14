@@ -10,7 +10,7 @@ namespace Netflix_Clone.Domain.DTOs
         [Required, MaxLength(500)] public string Synopsis { get; set; } = string.Empty;
 
         //location of the TV Show directory
-        [Required] public string Location { get; set; } = string.Empty;
+        //[Required] public string Location { get; set; } = string.Empty;
         [Required, Range(1, 2)] public int LanguageId { get; set; }
         [Required] public int ContentGenreId { get; set; }
         [Required] public int DirectorId { get; set; }

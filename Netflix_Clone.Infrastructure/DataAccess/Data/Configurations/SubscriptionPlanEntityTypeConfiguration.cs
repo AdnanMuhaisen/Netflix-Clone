@@ -34,8 +34,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
             builder.HasMany(x => x.PlanUsers)
                 .WithMany(x => x.SubscriptionPlans)
                 .UsingEntity<UserSubscriptionPlan>(
-                l => l.HasOne(x => x.ApplicationUser).WithMany(x => x.UsersSubscriptionPlans),
-                l => l.HasOne(x => x.SubscriptionPlan).WithMany(x => x.UsersSubscriptionPlans)
+                l => l.HasOne(x => x.ApplicationUser).WithMany(x => x.UsersSubscriptionPlans).HasForeignKey(x => x.UserId),
+                l => l.HasOne(x => x.SubscriptionPlan).WithMany(x => x.UsersSubscriptionPlans).HasForeignKey(x => x.SubscriptionPlanId)
                 );
             #endregion
         }

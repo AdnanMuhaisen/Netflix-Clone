@@ -28,7 +28,7 @@ namespace Netflix_Clone.API.Extensions
                         ValidateIssuer = true,
                         ValidIssuer = jwtOptions.Value.Issuer,
                         ValidateAudience = true,
-                        ValidAudience = jwtOptions.Value.Audience
+                        ValidAudience = jwtOptions.Value.Audience,
                     };
                 });
         }

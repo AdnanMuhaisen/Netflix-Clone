@@ -1,18 +1,20 @@
-﻿namespace Netflix_Clone.Domain.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Netflix_Clone.Domain.Entities
 {
     public class TVShowEpisode
     {
-        public int Id { get; init; } 
+        public int Id { get; set; } 
         public int LengthInMinutes { get; init; } 
         public int SeasonNumber { get; init; }
         public int EpisodeNumber { get; init; }
-        public string Location { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
 
         //relationships
         public int TVShowId { get; set; }
-        public TVShow TVShow { get; set; } = default!;
 
         public int SeasonId { get; set; }
+        [JsonIgnore]
         public TVShowSeason Season { get; set; } = default!;
     }
 }

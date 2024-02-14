@@ -19,6 +19,6 @@ namespace Netflix_Clone.Domain.DTOs
         public bool IsAvailableToDownload { get; set; }
         public int TotalNumberOfEpisodes { get; set; } = 0;
         public int TotalNumberOfSeasons { get; set; } = 0;
-        public List<TVShowSeason> Seasons { get; set; } = default!;
+        public List<TVShowSeasonDto> Seasons { get; set; } = default!;
     }
 }

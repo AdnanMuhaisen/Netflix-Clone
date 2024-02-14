@@ -14,7 +14,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Actor> ContentActor { get; set; }
         public DbSet<Director> ContentDirectors { get; set; }
+        public DbSet<UserWatchHistory> UsersWatchHistories { get; set; }
 
+        public DbSet<Content> Contents { get; set; }
         public DbSet<ContentActor> ContentsActors { get; set; }
         public DbSet<Award> Awards { get; set; }
         public DbSet<ContentAward> ContentAwards { get; set; }
@@ -24,6 +26,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures { get; set; }
         public DbSet<SubscriptionPlanSubscriptionPlanFeature> SubscriptionPlansFeatures { get; set; }
+        public DbSet<UserSubscriptionPlan> UsersSubscriptions { get; set; }
         public DbSet<TVShow> TVShows { get; set; }
         public DbSet<TVShowSeason> TVShowsSeasons { get; set; }
         public DbSet<TVShowEpisode> TVShowEpisodes { get; set; }

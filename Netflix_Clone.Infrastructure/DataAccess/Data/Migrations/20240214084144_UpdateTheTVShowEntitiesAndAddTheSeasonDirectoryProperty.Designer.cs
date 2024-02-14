@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 
@@ -11,9 +12,11 @@ using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240214084144_UpdateTheTVShowEntitiesAndAddTheSeasonDirectoryProperty")]
+    partial class UpdateTheTVShowEntitiesAndAddTheSeasonDirectoryProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -561,6 +564,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     b.HasIndex("SeasonId");
 
+                    b.HasIndex("TVShowId");
+
                     b.ToTable("tbl_TVShowEpisodes", (string)null);
                 });
 
@@ -623,32 +628,22 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsEnded")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPaid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("SubscriptionPlanId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubscriptionPlanId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("SubscriptionPlanId");
 
                     b.ToTable("tbl_UsersSubscriptions", (string)null);
                 });
@@ -866,7 +861,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Netflix_Clone.Domain.Entities.TVShow", "TVShow")
+                        .WithMany()
+                        .HasForeignKey("TVShowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Season");
+
+                    b.Navigation("TVShow");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShowSeason", b =>
@@ -882,15 +885,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserSubscriptionPlan", b =>
                 {
-                    b.HasOne("Netflix_Clone.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                    b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
                         .WithMany("UsersSubscriptionPlans")
-                        .HasForeignKey("SubscriptionPlanId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Netflix_Clone.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
                         .WithMany("UsersSubscriptionPlans")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("SubscriptionPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

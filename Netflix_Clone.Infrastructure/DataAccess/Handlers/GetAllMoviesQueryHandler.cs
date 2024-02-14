@@ -30,7 +30,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         {
             logger.LogTrace("The Get All Movies handler is started");
 
-            var movies = applicationDbContext
+            //decode the location from base 64 string 
+            var movies = await applicationDbContext
                 .Movies
                 .AsNoTracking()
                 .Select(m => new MovieDto
@@ -45,12 +46,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     ContentGenreId = m.ContentGenreId,
                     DirectorId = m.DirectorId,
                     //encode the Base64String
-                    Location = Encoding.UTF8.GetString(Convert.FromBase64String(m.Location))
-                });
+                    Location = m.Location
+                })
+                .ToListAsync();
 
             logger.LogTrace($"The movies are retrieved from the database");
 
-            return await movies.ToListAsync();
+            return movies;
         }
     }
 }

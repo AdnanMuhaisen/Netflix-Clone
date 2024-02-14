@@ -18,6 +18,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired(false);
 
+            builder.Property(x => x.DirectoryName)
+                .HasMaxLength(100)
+                .IsRequired(true);
+
             builder.HasMany(x => x.Episodes)
                 .WithOne(x => x.Season)
                 .HasForeignKey(x => x.SeasonId)

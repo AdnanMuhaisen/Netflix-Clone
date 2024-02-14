@@ -8,6 +8,7 @@ using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
+using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
@@ -44,6 +45,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             //create an empty folder to save the tv show seasons and episodes:
             string pathOfDirectoryToInsert = Path.Combine(options.Value.TargetDirectoryToSaveTo,
                     request.tVShowToInsertDto.Title);
+
+            //represents the directory name
+            tvShowToInsert.Location = pathOfDirectoryToInsert.Split('\\').Last();
+            tvShowToInsert.Location = Convert.ToBase64String(Encoding.UTF8.GetBytes(tvShowToInsert.Location));
+
             try
             {
                 var info = Directory.CreateDirectory(pathOfDirectoryToInsert);
