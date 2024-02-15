@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class GetAllTVShowsQueryHandler : IRequestHandler<GetAllTVShowsQuery, IEnumerable<TVShowDto>>
+    public class GetAllTVShowsQueryHandler : IRequestHandler<GetAllTVShowsQuery, ApiResponseDto>
     {
         private readonly ILogger<GetAllTVShowsQuery> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -26,7 +26,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<IEnumerable<TVShowDto>> Handle(GetAllTVShowsQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(GetAllTVShowsQuery request, CancellationToken cancellationToken)
         {
             var tvShows = applicationDbContext
                 .TVShows
@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(tvShows is null)
             {
-                return Enumerable.Empty<TVShowDto>();
+                return new ApiResponseDto { Result = Enumerable.Empty<TVShowDto>() };
             }
 
             var result = tvShows.Adapt<List<TVShowDto>>();
@@ -60,7 +60,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 }
             }
 
-            return result;
+            return new ApiResponseDto { Result = result };
         }
     }
 }

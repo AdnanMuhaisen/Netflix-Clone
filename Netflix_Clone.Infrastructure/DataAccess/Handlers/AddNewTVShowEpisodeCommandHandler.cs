@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class AddNewTVShowEpisodeCommandHandler : IRequestHandler<AddNewTVShowEpisodeCommand, TVShowEpisodeDto>
+    public class AddNewTVShowEpisodeCommandHandler : IRequestHandler<AddNewTVShowEpisodeCommand, ApiResponseDto>
     {
         private readonly ILogger<AddNewTVShowEpisodeCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -28,7 +28,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<TVShowEpisodeDto> Handle(AddNewTVShowEpisodeCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(AddNewTVShowEpisodeCommand request, CancellationToken cancellationToken)
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
@@ -122,7 +122,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return episodeToInsert.Adapt<TVShowEpisodeDto>();
+                return new ApiResponseDto { Result = episodeToInsert.Adapt<TVShowEpisodeDto>() };
             }
             catch(Exception ex)
             {

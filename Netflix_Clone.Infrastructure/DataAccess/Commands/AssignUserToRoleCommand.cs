@@ -4,7 +4,7 @@ using Netflix_Clone.Domain.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.Commands
 {
     public class AssignUserToRoleCommand(AssignUserToRoleRequestDto assignUserToRoleRequestDto) 
-        : IRequest<AssignUserToRoleResponseDto>
+        : IRequest<ApiResponseDto>
     {
         public readonly AssignUserToRoleRequestDto assignUserToRoleRequestDto = assignUserToRoleRequestDto;
     }

@@ -15,7 +15,7 @@ namespace Netflix_Clone.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class MoviesController : BaseController<MoviesController>
     {
         private readonly IMediator mediator;
@@ -38,7 +38,7 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetAllMovies()
+        public async Task<ActionResult<ApiResponseDto>> GetAllMovies()
         {
             logger.LogTrace($"{nameof(GetAllMovies)} is executing");
 
@@ -46,11 +46,11 @@ namespace Netflix_Clone.API.Controllers
 
             logger.LogTrace($"The {nameof(GetAllMoviesQuery)} is initialized");
 
-            var queryResult = Enumerable.Empty<MovieDto>();
+            ApiResponseDto response = default!;
 
             try
             {
-                queryResult = await mediator.Send(query);
+                response = await mediator.Send(query);
 
                 logger.LogTrace($"The {nameof(GetAllMoviesQuery)} is executed");
             }
@@ -58,18 +58,18 @@ namespace Netflix_Clone.API.Controllers
             {
                 logger.LogError($"The {nameof(GetAllMoviesQuery)} is failed due to {ex.Message}");
 
-                return BadRequest(queryResult);
+                return BadRequest(response);
             }
 
             logger.LogTrace($"{nameof(AddNewMovie)} is executed");
 
-            return Ok(queryResult);
+            return Ok(response);
         }
 
         [HttpPost]
         [Route("POST")]
         [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
-        public async Task<ActionResult<MovieDto>> AddNewMovie([FromBody] MovieToInsertDto movieToInsertDto)
+        public async Task<ActionResult<ApiResponseDto>> AddNewMovie([FromBody] MovieToInsertDto movieToInsertDto)
         {
             logger.LogTrace($"{nameof(AddNewMovie)} is executing");
 
@@ -91,11 +91,11 @@ namespace Netflix_Clone.API.Controllers
 
                 // process and save the movie:
                 var command = new AddNewMovieCommand(movieToInsertDto);
-                MovieDto result = default!;
+                 ApiResponseDto response = default!;
 
                 try
                 {
-                    result = await mediator.Send(command);
+                    response = await mediator.Send(command);
                 }
                 catch (InvalidMappingOperationException ex)
                 {
@@ -108,7 +108,7 @@ namespace Netflix_Clone.API.Controllers
 
                 logger.LogTrace($"The {nameof(AddNewMovie)} executed successfully");
 
-                return Created("", result);
+                return Created("", response);
             }
             else
             {
@@ -122,21 +122,21 @@ namespace Netflix_Clone.API.Controllers
         [HttpDelete]
         [Route("DELETE/{ContentId:int}")]
         [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
-        public async Task<ActionResult> DeleteMovie(int ContentId)
+        public async Task<ActionResult<ApiResponseDto>> DeleteMovie(int ContentId)
         {
             var deleteMovieCommand = new DeleteMovieCommand(ContentId);
 
-            bool commandResult = default;
+            ApiResponseDto response = default!;
             try
             {
-                commandResult = await mediator.Send(deleteMovieCommand);
+                response = await mediator.Send(deleteMovieCommand);
             }
             catch (Exception ex)
             {
                 return BadRequest($"EntityNotFound {ex.Message}");
             }
 
-            if (!commandResult)
+            if (!((bool)(response.Result)))
                 return BadRequest("The movie is failed to delete");
 
             return NoContent();
@@ -145,7 +145,7 @@ namespace Netflix_Clone.API.Controllers
         [HttpPut]
         [Route("PUT")]
         [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
-        public async Task<ActionResult<MovieDto>> UpdateMovieInfo([FromBody] MovieDto movieDto)
+        public async Task<ActionResult<ApiResponseDto>> UpdateMovieInfo([FromBody] MovieDto movieDto)
         {
             var command = new UpdateMovieCommand(movieDto);
 
@@ -157,13 +157,12 @@ namespace Netflix_Clone.API.Controllers
             {
                 return BadRequest(new { movieDto, ex.Message });
             }
-
             return NoContent(); 
         }
 
         [HttpGet]
         [Route("GET/{ContentId:int}")]
-        public async Task<ActionResult<MovieDto>> GetMovie([FromRoute] int ContentId)
+        public async Task<ActionResult<ApiResponseDto>> GetMovie([FromRoute] int ContentId)
         {
             logger.LogTrace("The get movie action in started");
 
@@ -171,9 +170,10 @@ namespace Netflix_Clone.API.Controllers
 
             try
             {
-                var targetMovie = await mediator.Send(query);
+                var response = await mediator.Send(query);
 
-                logger.LogTrace("The move with id : {id} is retrieved successfully", targetMovie.Id);
+                logger.LogTrace("The move with id : {id} is retrieved successfully",
+                    ((MovieDto)response.Result).Id);
 
                 //add to user history if the user role is user:
                 if(User.Claims.First(c=>c.Type == ClaimTypes.Role).Value == USER_ROLE)
@@ -184,10 +184,10 @@ namespace Netflix_Clone.API.Controllers
                         ContentId = ContentId
                     });
 
-                    var result = await mediator.Send(addToUserHistoryCommand);
+                    await mediator.Send(addToUserHistoryCommand);
                 }
 
-                return Ok(targetMovie);
+                return Ok(response);
             }
             catch(Exception ex)
             {
@@ -197,15 +197,17 @@ namespace Netflix_Clone.API.Controllers
             }
         }
 
+        //test
         [HttpPost]
         [Route("POST/Download")]
-        public async Task<ActionResult<DownloadMovieResponseDto>> DownloadMovie([FromBody] DownloadMovieRequestDto downloadMovieRequestDto)
+        public async Task<ActionResult<ApiResponseDto>> DownloadMovie([FromBody] DownloadMovieRequestDto downloadMovieRequestDto)
         {
             logger.LogTrace("The download movie action is started");
 
             if (ModelState.IsValid)
             {
-                var command = new DownloadMovieCommand(downloadMovieRequestDto);
+                var command = new DownloadMovieCommand(downloadMovieRequestDto,
+                    User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
                 try
                 {
@@ -223,14 +225,43 @@ namespace Netflix_Clone.API.Controllers
                 {
                     logger.LogError("An error occurred while trying to download the movie because this exception : {message}", ex.Message);
 
-                    return BadRequest(new DownloadMovieResponseDto
+                    return BadRequest(new ApiResponseDto
                     {
-                        IsDownloaded = false,
+                        Result = new DownloadMovieResponseDto { IsDownloaded = false },
                         Message = ex.Message
                     });
                 }
             }
             return BadRequest(ModelState);
+        }
+
+        [HttpGet]
+        [Route("GET/GetRecommendedMovies")]
+        public async Task<ActionResult<ApiResponseDto>> GetRecommendedMovies(
+            [FromQuery] int TotalNumberOfItemsRetrieved = 10)
+        {
+            var query = new GetRecommendedMoviesQuery(
+                User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+                TotalNumberOfItemsRetrieved);
+
+            var response = await mediator.Send(query);
+
+            return Ok(response);
+        }
+
+
+        [HttpGet]
+        [Route("GET/GetMoviesBy")]
+        public async Task<ActionResult<ApiResponseDto>> GetMoviesBy(
+            [FromQuery] int? GenreId = default,
+            [FromQuery] int? ReleaseYear = default,
+            [FromQuery] int? MinimumAgeToWatch = default,
+            [FromQuery] int? LanguageId = default,
+            [FromQuery] int? DirectorId = default)
+        {
+            var query = new GetMoviesByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId);
+            var response = await mediator.Send(query);
+            return Ok(response);
         }
     }
 }

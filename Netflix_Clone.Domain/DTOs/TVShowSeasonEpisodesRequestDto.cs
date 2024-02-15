@@ -4,5 +4,6 @@
     {
         public required int TVShowId { get; set; }
         public required int TVShowSeasonId { get; set; }
-    }
+    }  
+
 }

@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class GetTVShowQueryHandler : IRequestHandler<GetTVShowQuery, TVShowDto>
+    public class GetTVShowQueryHandler : IRequestHandler<GetTVShowQuery, ApiResponseDto>
     {
         private readonly ILogger<GetTVShowQueryHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -27,7 +27,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<TVShowDto> Handle(GetTVShowQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(GetTVShowQuery request, CancellationToken cancellationToken)
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
@@ -52,7 +52,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 }
             }
 
-            return result;
+            return new ApiResponseDto { Result = result };
         }
     }
 }

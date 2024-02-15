@@ -10,7 +10,7 @@ using System.Text;
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
     public class GetTVShowSeasonEpisodesQueryHandler 
-        : IRequestHandler<GetTVShowSeasonEpisodesQuery, IEnumerable<TVShowEpisodeDto>>
+        : IRequestHandler<GetTVShowSeasonEpisodesQuery, ApiResponseDto>
     {
         private readonly ILogger<GetTVShowSeasonEpisodesQueryHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -22,7 +22,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.applicationDbContext = applicationDbContext;
         }
 
-        public async Task<IEnumerable<TVShowEpisodeDto>> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
         {
             var episodes = await applicationDbContext
                 .TVShowEpisodes
@@ -32,13 +32,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(episodes is null)
             {
-                return Enumerable.Empty<TVShowEpisodeDto>();
+                return new ApiResponseDto { Result = Enumerable.Empty<TVShowEpisodeDto>() };
             }
 
             foreach (var episode in episodes)
                 episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));
 
-            return episodes.Adapt<List<TVShowEpisodeDto>>();
+            return new ApiResponseDto { Result = episodes.Adapt<List<TVShowEpisodeDto>>() };
         }
     }
 }

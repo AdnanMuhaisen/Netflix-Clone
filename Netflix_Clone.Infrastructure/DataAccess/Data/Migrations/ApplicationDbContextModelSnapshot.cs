@@ -367,6 +367,30 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.ToTable("tbl_ContentsAwards", (string)null);
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentDownload", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ContentId");
+
+                    b.ToTable("tbl_UsersDownloads", (string)null);
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentGenre", b =>
                 {
                     b.Property<int>("Id")
@@ -820,6 +844,25 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("Content");
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentDownload", b =>
+                {
+                    b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("ContentsDownloads")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Netflix_Clone.Domain.Entities.Content", "Content")
+                        .WithMany("ContentsDownloads")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Content");
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentTag", b =>
                 {
                     b.HasOne("Netflix_Clone.Domain.Entities.Content", "Content")
@@ -920,6 +963,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("ContentsDownloads");
+
                     b.Navigation("UsersHistory");
 
                     b.Navigation("UsersSubscriptionPlans");
@@ -935,6 +980,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("ContentsActors");
 
                     b.Navigation("ContentsAwards");
+
+                    b.Navigation("ContentsDownloads");
 
                     b.Navigation("ContentsTags");
 

@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class GetMovieQueryHandler : IRequestHandler<GetMovieQuery, MovieDto>
+    public class GetMovieQueryHandler : IRequestHandler<GetMovieQuery, ApiResponseDto>
     {
         private readonly ILogger<GetMovieQuery> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -25,7 +25,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<MovieDto> Handle(GetMovieQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(GetMovieQuery request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The get movie query handler is start to execute");
 
@@ -38,11 +38,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             logger.LogTrace("The movie is retrieved successfully");
 
             //decode the movie location
-            targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo, targetMovieToRetrieve.Location);
-            //targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo,
-            //    Encoding.UTF8.GetString(Convert.FromBase64String(targetMovieToRetrieve.Location)));
+            //targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo, targetMovieToRetrieve.Location);
+            targetMovieToRetrieve.Location = Path.Combine(options.Value.TargetDirectoryToSaveTo,
+                Encoding.UTF8.GetString(Convert.FromBase64String(targetMovieToRetrieve.Location)));
 
-            return targetMovieToRetrieve.Adapt<MovieDto>(); ;
+            return new ApiResponseDto { Result = targetMovieToRetrieve.Adapt<MovieDto>() };
         }
     }
 }

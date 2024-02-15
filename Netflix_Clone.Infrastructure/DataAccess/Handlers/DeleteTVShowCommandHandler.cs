@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class DeleteTVShowCommandHandler : IRequestHandler<DeleteTVShowCommand, DeletionResultDto>
+    public class DeleteTVShowCommandHandler : IRequestHandler<DeleteTVShowCommand, ApiResponseDto>
     {
         private readonly ILogger<DeleteTVShowCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -25,7 +25,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<DeletionResultDto> Handle(DeleteTVShowCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(DeleteTVShowCommand request, CancellationToken cancellationToken)
         {
             var targetTVShowToDelete = await applicationDbContext
                 .TVShows
@@ -33,9 +33,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(targetTVShowToDelete is null)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = $"The target TV Show to delete with id {request.tVShowId} does not exist"
                 };
             }
@@ -47,9 +50,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(!Directory.Exists(pathOfTheTargetTVShow))
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = $"Can not find the target TV Show directory"
                 };
             }
@@ -61,9 +67,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             }
             catch(Exception ex)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = $"Can not delete the target TV Show directory"
                 };
             }
@@ -72,18 +81,32 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             try
             {
+                applicationDbContext
+                    .TVShowEpisodes
+                    .Where(x => x.TVShowId == request.tVShowId)
+                    .ExecuteDelete();
+
                 applicationDbContext.TVShows.Remove(targetTVShowToDelete);
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new DeletionResultDto { IsDeleted = true };
+                return new ApiResponseDto
+                {
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = true,
+                    }
+                };
             }
             catch(Exception ex)
             {
                 //log
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = "The TV Show is deleted from the disk but can not delete it from the database"
                 };
             }

@@ -48,6 +48,5 @@ namespace Netflix_Clone.API.Controllers
             var result = await mediator.Send(command);
             return (result.Result is null) ? BadRequest(result) : Created("", result);
         }
-
     }
 }

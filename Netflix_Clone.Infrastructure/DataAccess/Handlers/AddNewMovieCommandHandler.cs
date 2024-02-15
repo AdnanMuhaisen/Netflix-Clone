@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class AddNewMovieCommandHandler : IRequestHandler<AddNewMovieCommand, MovieDto>
+    public class AddNewMovieCommandHandler : IRequestHandler<AddNewMovieCommand, ApiResponseDto>
     {
         private readonly ILogger<AddNewMovieCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -31,7 +31,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.fileManager = fileManager;
         }
 
-        public async Task<MovieDto> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
         {
             var movie = request.movieToInsertDto.Adapt<Movie>();
 
@@ -62,8 +62,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 logger.LogTrace($"The movie added to the database successfully");
 
                 var result = movie.Adapt<MovieDto>();
-                
-                return result;
+
+                return new ApiResponseDto { Result = result };
             }
             catch (Exception ex)
             {
@@ -77,5 +77,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 throw new InsertionException(ex.Message);
             }
         }
+
+
     }
 }

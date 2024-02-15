@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class UpdateMovieCommandHandler : IRequestHandler<UpdateMovieCommand, MovieDto>
+    public class UpdateMovieCommandHandler : IRequestHandler<UpdateMovieCommand, ApiResponseDto>
     {
         private readonly ApplicationDbContext applicationDbContext;
         private readonly ILogger<UpdateMovieCommandHandler> logger;
@@ -32,7 +32,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.options = options;
         }
 
-        public async Task<MovieDto> Handle(UpdateMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(UpdateMovieCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The update movie handler is start to execute");
 
@@ -108,7 +108,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
                 logger.LogTrace("The movie with id {id} is updated successfully", request.movieDto.Id);
 
-                return request.movieDto;
+                return new ApiResponseDto { Result = request.movieDto };
             }
             catch ( Exception ex )
             {

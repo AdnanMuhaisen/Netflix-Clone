@@ -88,6 +88,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Configurations
                 l => l.HasOne(x => x.Tag).WithMany(x => x.ContentsTags),
                 l => l.HasOne(x => x.Content).WithMany(x => x.ContentsTags).IsRequired()
                 );
+
+
+            builder.HasMany(x => x.DownloadedBy)
+                .WithMany(x => x.Downloads)
+                .UsingEntity<ContentDownload>(
+                l => l.HasOne(x => x.ApplicationUser).WithMany(y => y.ContentsDownloads).HasForeignKey(y => y.ApplicationUserId),
+                l => l.HasOne(x => x.Content).WithMany(y => y.ContentsDownloads).HasForeignKey(y => y.ContentId)
+                );
         }
     }
 }

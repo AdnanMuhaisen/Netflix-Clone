@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class DeleteSeasonEpisodeCommandHandler : IRequestHandler<DeleteSeasonEpisodeCommand, DeletionResultDto>
+    public class DeleteSeasonEpisodeCommandHandler : IRequestHandler<DeleteSeasonEpisodeCommand, ApiResponseDto>
     {
         private readonly ILogger<DeleteSeasonEpisodeCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -26,7 +26,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         }
 
 
-        public async Task<DeletionResultDto> Handle(DeleteSeasonEpisodeCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(DeleteSeasonEpisodeCommand request, CancellationToken cancellationToken)
         {
             var targetEpisodeToDelete = await applicationDbContext
                 .TVShowEpisodes
@@ -36,9 +36,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(targetEpisodeToDelete is null)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = $"Can not find the episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}"
                 };
             }
@@ -57,9 +60,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(!Directory.Exists(pathOfTheEpisodeSeasonDirectory))
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = "Can not find the TV Show Season Directory"
                 };
             }
@@ -69,9 +75,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(!File.Exists(pathOfTheTargetEpisodeFile))
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = "Can not find the TV Show Season Episode File"
                 };
             }
@@ -83,9 +92,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             }
             catch(Exception ex)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = ex.Message
                 };
             }
@@ -101,16 +113,22 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = true
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = true
+                    }
                 };
             }
             catch(Exception ex)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto
+                    {
+                        IsDeleted = false,
+                    },
                     Message = $"The episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID} is deleted from the disk but does" +
                     $" not deleted from the database because this exception : " + ex.Message
                 };

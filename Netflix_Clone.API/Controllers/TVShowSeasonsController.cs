@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Infrastructure.DataAccess.Commands;
@@ -8,6 +9,7 @@ namespace Netflix_Clone.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowSeasonsController : BaseController<TVShowSeasonsController>
     {
         private readonly IMediator mediator;
@@ -21,24 +23,25 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("GET/{TVShowContentId:int}")]
-        public async Task<ActionResult<IEnumerable<TVShowSeasonDto>>> GetTVShowSeasons(int TVShowContentId)
+        public async Task<ActionResult<ApiResponseDto>> GetTVShowSeasons(int TVShowContentId)
         {
             var query = new GetTVShowSeasonsQuery(TVShowContentId);
-            var result = await mediator.Send(query);
-            return (result is null) ? BadRequest(result) : Ok(result);
+            var response = await mediator.Send(query);
+            return (response is null) ? BadRequest(response) : Ok(response);
         }
 
         [HttpPost]
         [Route("POST/AddNewSeasonForTVShow")]
-        public async Task<ActionResult<TVShowSeasonDto>> AddNewSeasonForTVShow([FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
+        [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto>> AddNewSeasonForTVShow([FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
                     var command = new AddNewTVShowSeasonCommand(tVShowSeasonToInsertDto);
-                    var result = await mediator.Send(command);
-                    return Created("", result);
+                    var response = await mediator.Send(command);
+                    return Created("", response);
                 }
                 catch(Exception ex)
                 {
@@ -54,20 +57,19 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpDelete]
         [Route("DELETE/DeleteTVShowSeason")]
-        public async Task<ActionResult<DeletionResultDto>> DeleteTVShowSeason([FromBody] DeleteTVShowSeasonRequestDto deleteTVShowSeasonRequestDto)
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto>> DeleteTVShowSeason([FromBody] DeleteTVShowSeasonRequestDto deleteTVShowSeasonRequestDto)
         {
             if (ModelState.IsValid)
             {
                 var command = new DeleteTVShowSeasonCommand(deleteTVShowSeasonRequestDto);
-                var result = await mediator.Send(command);
-                return (result.IsDeleted) ? NoContent() : BadRequest(result);   
+                var response = await mediator.Send(command);
+                return (((DeletionResultDto)response.Result).IsDeleted) ? NoContent() : BadRequest(response);   
             }
             else
             {
                 return BadRequest("Invalid Model State");
             }
         }
-
-
     }
 }

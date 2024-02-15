@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class DeleteTVShowSeasonCommandHandler : IRequestHandler<DeleteTVShowSeasonCommand, DeletionResultDto>
+    public class DeleteTVShowSeasonCommandHandler : IRequestHandler<DeleteTVShowSeasonCommand, ApiResponseDto>
     {
         private readonly ILogger<DeleteTVShowSeasonCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -26,7 +26,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         }
 
 
-        public async Task<DeletionResultDto> Handle(DeleteTVShowSeasonCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(DeleteTVShowSeasonCommand request, CancellationToken cancellationToken)
         {
             var targetSeasonToDelete = await applicationDbContext
                 .TVShowsSeasons
@@ -36,9 +36,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(targetSeasonToDelete is null)
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The target season with id: {request.deleteTVShowSeasonRequestDto.TVShowSeasonId}," +
                     $" number: {request.deleteTVShowSeasonRequestDto.TVShowSeasonNumber} does not exist"
                 };
@@ -48,26 +48,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 .TVShows
                 .SingleAsync(x => x.Id == request.deleteTVShowSeasonRequestDto.TVShowId);
 
-            //tv show location error
-            //string pathOfTheSeasonDirectory = Path.Combine(options.Value.TargetDirectoryToSaveTo,
-
-            //    (string.IsNullOrEmpty(seasonTVShow.Location))
-            //    ? $"{seasonTVShow.Title}"
-            //    : Encoding.UTF8.GetString(Convert.FromBase64String(seasonTVShow.Location)),
-
-            //    (string.IsNullOrEmpty(targetSeasonToDelete.SeasonName))
-            //    ? $"{seasonTVShow.Title}-{targetSeasonToDelete.SeasonNumber}"
-            //    : $"{seasonTVShow.Title}-{targetSeasonToDelete.SeasonNumber}-{targetSeasonToDelete.SeasonName}");
-
             string pathOfTheSeasonDirectory = Path.Combine(options.Value.TargetDirectoryToSaveTo,
                         Encoding.UTF8.GetString(Convert.FromBase64String(seasonTVShow.Location)),
                         Encoding.UTF8.GetString(Convert.FromBase64String(targetSeasonToDelete.DirectoryName)));
 
             if (!Directory.Exists(pathOfTheSeasonDirectory))
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The season directory does not exists"
                 };
             }
@@ -79,9 +68,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             }
             catch (Exception ex) 
             {
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"Can not delete the season directory because this error : {ex.Message}"
                 };
             }
@@ -106,17 +95,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = true
+                    Result = new DeletionResultDto { IsDeleted = true }
                 };
             }
             catch(Exception ex)
             {
                 //log the error
-                return new DeletionResultDto
+                return new ApiResponseDto
                 {
-                    IsDeleted = false,
+                    Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The season directory have been deleted but the records in the database does not deleted"
                 };
             }

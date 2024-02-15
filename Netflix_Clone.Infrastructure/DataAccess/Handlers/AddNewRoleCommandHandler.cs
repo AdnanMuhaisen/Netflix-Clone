@@ -6,7 +6,7 @@ using Netflix_Clone.Infrastructure.DataAccess.Commands;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class AddNewRoleCommandHandler : IRequestHandler<AddNewRoleCommand, AddNewRoleResponseDto>
+    public class AddNewRoleCommandHandler : IRequestHandler<AddNewRoleCommand, ApiResponseDto>
     {
         private readonly ILogger<AddNewRoleCommandHandler> logger;
         private readonly RoleManager<IdentityRole> roleManager;
@@ -20,13 +20,16 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.roleManager = roleManager;
         }
 
-        public async Task<AddNewRoleResponseDto> Handle(AddNewRoleCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(AddNewRoleCommand request, CancellationToken cancellationToken)
         {
             if (await roleManager.RoleExistsAsync(request.roleName))
             {
-                return new AddNewRoleResponseDto
+                return new ApiResponseDto
                 {
-                    IsAdded = false,
+                    Result = new AddNewRoleResponseDto
+                    {
+                        IsAdded = false,
+                    },
                     Message = $"The role with the name {request.roleName} is already exist"
                 };
             }
@@ -40,8 +43,16 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             });
 
             return (result.Succeeded)
-                ? new AddNewRoleResponseDto { IsAdded = true, Message = string.Empty }
-                : new AddNewRoleResponseDto { IsAdded = false, Message = string.Join(',', result.Errors.Select(x => x.Description)) };
+                ? new ApiResponseDto
+                {
+                    Result = new AddNewRoleResponseDto { IsAdded = true },
+                    Message = string.Empty
+                }
+                : new ApiResponseDto
+                {
+                    Result = new AddNewRoleResponseDto { IsAdded = false },
+                    Message = string.Join(',', result.Errors.Select(x => x.Description))
+                };
         }
     }
 }

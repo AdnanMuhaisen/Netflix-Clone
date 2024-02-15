@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class AddNewTVShowSeasonCommandHandler : IRequestHandler<AddNewTVShowSeasonCommand, TVShowSeasonDto>
+    public class AddNewTVShowSeasonCommandHandler : IRequestHandler<AddNewTVShowSeasonCommand, ApiResponseDto>
     {
         private readonly ILogger<AddNewTVShowSeasonCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -27,7 +27,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.applicationDbContext = applicationDbContext;
             this.options = options;
         }
-        public async Task<TVShowSeasonDto> Handle(AddNewTVShowSeasonCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(AddNewTVShowSeasonCommand request, CancellationToken cancellationToken)
         {
             var currentTVShowSeasons = await applicationDbContext
                 .TVShowsSeasons
@@ -111,7 +111,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 throw new InsertionException(ex.Message);
             }
 
-            return seasonToAdd.Adapt<TVShowSeasonDto>();
+            return new ApiResponseDto { Result = seasonToAdd.Adapt<TVShowSeasonDto>() };
         }
     }
 }

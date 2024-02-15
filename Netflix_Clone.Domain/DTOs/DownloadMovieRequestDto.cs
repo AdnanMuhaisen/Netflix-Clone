@@ -6,6 +6,6 @@ namespace Netflix_Clone.Domain.DTOs
     {
         public required int MovieId { get; set; }
         [MaxLength(100)]
-        public required string PathToDownloadFor { get; set; } = string.Empty;
+        public string PathToDownloadFor { get; set; } = string.Empty;
     }
 }

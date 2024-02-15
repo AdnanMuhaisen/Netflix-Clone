@@ -7,11 +7,12 @@ using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain;
 using System.Text;
 using Netflix_Clone.Application.Services.IServices;
+using Netflix_Clone.Domain.DTOs;
 
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class DeleteMovieCommandHandler : IRequestHandler<DeleteMovieCommand, bool>
+    public class DeleteMovieCommandHandler : IRequestHandler<DeleteMovieCommand, ApiResponseDto>
     {
         private readonly ILogger<DeleteMovieCommandHandler> logger;
         private readonly ApplicationDbContext applicationDbContext;
@@ -29,7 +30,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             this.fileManager = fileManager;
         }
 
-        public async Task<bool> Handle(DeleteMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto> Handle(DeleteMovieCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The delete movie handler is start to execute");
 
@@ -55,7 +56,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(!IsOriginalFileDeleted)
             {
-                return false;
+                return new ApiResponseDto
+                {
+                    Result = null!,
+                    Message = "Can not delete the file"
+                };
             }
 
             //delete the compressed file
@@ -63,7 +68,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             if(!IsCompressedFileDeleted)
             {
-                return false;
+                return new ApiResponseDto
+                {
+                    Result = null!,
+                    Message = "Can not delete the compressed file"
+                };
             }
 
             //delete from the database
@@ -77,13 +86,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
                 logger.LogTrace("The movie with id = {id} is deleted from the database", targetMovieToDelete.Id);
 
-                return true;
+                return new ApiResponseDto
+                {
+                    Result = true,
+                };
             }
             catch (Exception ex)
             {
                 logger.LogError("The movie with id = {id} is failed to delete from the database due to this exception: {exMessage}", targetMovieToDelete.Id, ex.Message);
 
-                return false;
+                return new ApiResponseDto
+                {
+                    Result = null!,
+                    Message = ex.Message
+                };
             }
         }
     }

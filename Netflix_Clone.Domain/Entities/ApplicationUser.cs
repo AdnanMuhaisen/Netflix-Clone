@@ -20,5 +20,8 @@ namespace Netflix_Clone.Domain.Entities
 
         public IEnumerable<SubscriptionPlan> SubscriptionPlans { get; set; } = new List<SubscriptionPlan>();
         public IEnumerable<UserSubscriptionPlan> UsersSubscriptionPlans { get; set; } = new List<UserSubscriptionPlan>();
+
+        public ICollection<Content> Downloads { get; set; } = new List<Content>();
+        public ICollection<ContentDownload> ContentsDownloads { get; set; } = new List<ContentDownload>();
     }
 }

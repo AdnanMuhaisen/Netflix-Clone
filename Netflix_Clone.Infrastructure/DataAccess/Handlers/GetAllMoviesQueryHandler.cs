@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 {
-    public class GetAllMoviesQueryHandler : IRequestHandler<GetAllMoviesQuery, IEnumerable<MovieDto>>
+    public class GetAllMoviesQueryHandler : IRequestHandler<GetAllMoviesQuery, ApiResponseDto>
     {
         private readonly ApplicationDbContext applicationDbContext;
         private readonly ILogger<GetAllMoviesQueryHandler> logger;
@@ -25,12 +25,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         }
 
 
-        public async Task<IEnumerable<MovieDto>> Handle(GetAllMoviesQuery request,
+        public async Task<ApiResponseDto> Handle(GetAllMoviesQuery request,
             CancellationToken cancellationToken)
         {
             logger.LogTrace("The Get All Movies handler is started");
 
-            //decode the location from base 64 string 
             var movies = await applicationDbContext
                 .Movies
                 .AsNoTracking()
@@ -45,14 +44,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     LanguageId = m.LanguageId,
                     ContentGenreId = m.ContentGenreId,
                     DirectorId = m.DirectorId,
-                    //encode the Base64String
-                    Location = m.Location
+                    Location = Encoding.UTF8.GetString(Convert.FromBase64String(m.Location))
                 })
                 .ToListAsync();
 
             logger.LogTrace($"The movies are retrieved from the database");
 
-            return movies;
+            return new ApiResponseDto { Result = movies };
         }
     }
 }

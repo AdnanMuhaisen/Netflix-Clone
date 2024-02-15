@@ -44,7 +44,7 @@ namespace Netflix_Clone.API.Controllers
         [HttpPost]
         [Route("POST/AddNewUserRole/{RoleName}")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<bool>> AddNewUserRole([FromRoute] string RoleName)
+        public async Task<ActionResult<ApiResponseDto>> AddNewUserRole([FromRoute] string RoleName)
         {
             if (string.IsNullOrWhiteSpace(RoleName))
             {
@@ -52,11 +52,11 @@ namespace Netflix_Clone.API.Controllers
             }
 
             var command = new AddNewRoleCommand(RoleName);
-            var result = await mediator.Send(command);
+            var response = await mediator.Send(command);
 
-            return (result.IsAdded)
-                ? Created("", result)
-                : BadRequest(result);
+            return (((AddNewRoleResponseDto)(response.Result)).IsAdded)
+                ? Created("", response)
+                : BadRequest(response);
         }
 
         [HttpPost]
@@ -82,19 +82,21 @@ namespace Netflix_Clone.API.Controllers
         [HttpPost]
         [Route("POST/AssignRoleToUser")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<AssignUserToRoleResponseDto>> AssignUserToRole([FromBody] AssignUserToRoleRequestDto assignUserToRoleRequestDto)
+        public async Task<ActionResult<ApiResponseDto>> AssignUserToRole([FromBody] AssignUserToRoleRequestDto assignUserToRoleRequestDto)
         {
             if(ModelState.IsValid)
             {
                 var command = new AssignUserToRoleCommand(assignUserToRoleRequestDto);
-                var result = await mediator.Send(command);
-                return (result.IsAssigned) ? Ok(result) : BadRequest(result);
+                var response = await mediator.Send(command);
+                return (((AssignUserToRoleResponseDto)(response.Result)).IsAssigned)
+                    ? Ok(response)
+                    : BadRequest(response);
             }
             else
             {
-                return new AssignUserToRoleResponseDto
+                return new ApiResponseDto
                 {
-                    IsAssigned = false,
+                    Result = null!,
                     Message = "Invalid Model State"
                 };
             }

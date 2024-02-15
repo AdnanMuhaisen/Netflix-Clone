@@ -3,6 +3,5 @@
     public record AddNewRoleResponseDto
     {
         public bool IsAdded { get; set; }
-        public string Message { get; set; } = string.Empty;
     }
 }
