@@ -197,7 +197,6 @@ namespace Netflix_Clone.API.Controllers
             }
         }
 
-        //test
         [HttpPost]
         [Route("POST/Download")]
         public async Task<ActionResult<ApiResponseDto>> DownloadMovie([FromBody] DownloadMovieRequestDto downloadMovieRequestDto)

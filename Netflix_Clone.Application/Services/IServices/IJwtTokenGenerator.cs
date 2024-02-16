@@ -2,7 +2,7 @@
 
 namespace Netflix_Clone.Application.Services.IServices
 {
-    public interface IJwtTokenGenerator
+    public interface IJwtTokenGenerator : IScopedService
     {
         string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> UserRoles);
     }

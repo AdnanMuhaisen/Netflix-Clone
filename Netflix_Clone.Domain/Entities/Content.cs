@@ -26,11 +26,8 @@ namespace Netflix_Clone.Domain.Entities
         public ICollection<ContentAward> ContentsAwards { get; set; } = new List<ContentAward>();
 
         public int ContentGenreId { get; set; }
-        //public ContentGenre Genre { get; set; }
-
 
         public int DirectorId { get; set; }
-        //public Director Director { get; set; }
 
         public ICollection<Actor> Actors { get; set; } = new List<Actor>();
         public ICollection<ContentActor> ContentsActors { get; set; } = new List<ContentActor>();

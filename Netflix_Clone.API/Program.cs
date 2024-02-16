@@ -21,32 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Description = "Enter The Bearer Authorization string as follows : ` Bearer Generated - JWT - Token`",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = JwtBearerDefaults.AuthenticationScheme
-                }
-            },new string[] {}
-        }
-    });
-});
-
+//swagger interface for authentication
+builder.Services.ConfigureSwagger();
 
 //configure the options:
 builder.Services.Configure<ContentMovieOptions>(builder.Configuration.GetSection("Content:Movies"));
@@ -57,8 +34,6 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 //register the JWT Authentication:
 builder.Services.ConfigureJwtBearerAuthentication();
 builder.Services.AddAuthorization();
-
-//app services:
 
 //configure the logger
 var logger = new LoggerConfiguration()
@@ -84,7 +59,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.EnableSensitiveDataLogging();
 });
 
-
 //configure the mediator:
 builder.Services.AddMediatR(cfg =>
 {
@@ -92,8 +66,6 @@ builder.Services.AddMediatR(cfg =>
 });
 
 builder.Services.RegisterMapsterConfigurations();
-
-
 builder.Services.AddScoped<IFileCompressor, FileCompressor>();
 builder.Services.AddScoped<IFileManager, FileManager>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -106,6 +78,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

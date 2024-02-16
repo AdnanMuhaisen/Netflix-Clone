@@ -86,7 +86,7 @@ namespace Netflix_Clone.API.Controllers
         // get TVShow based on filters 
 
         [HttpGet]
-        [Route("GET/GetRecommendedTVShows")]
+        [Route("GET/RecommendedTVShows")]
         public async Task<ActionResult<ApiResponseDto>> GetRecommendedTVShows([FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
             var query = new GetRecommendedTVShowsQuery(
@@ -99,7 +99,7 @@ namespace Netflix_Clone.API.Controllers
         }
 
         [HttpGet]
-        [Route("GET/GetTVShowBy")]
+        [Route("GET/TVShowBy")]
         public async Task<ActionResult<ApiResponseDto>> GetTVShowsBy(
             [FromQuery] int? GenreId = default,
             [FromQuery] int? ReleaseYear = default,

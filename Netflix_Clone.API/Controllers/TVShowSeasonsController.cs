@@ -56,7 +56,7 @@ namespace Netflix_Clone.API.Controllers
 
 
         [HttpDelete]
-        [Route("DELETE/DeleteTVShowSeason")]
+        [Route("DELETE/TVShowSeason")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto>> DeleteTVShowSeason([FromBody] DeleteTVShowSeasonRequestDto deleteTVShowSeasonRequestDto)
         {

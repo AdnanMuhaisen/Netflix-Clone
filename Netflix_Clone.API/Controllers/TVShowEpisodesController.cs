@@ -42,7 +42,7 @@ namespace Netflix_Clone.API.Controllers
         }
 
         [HttpPost]
-        [Route("POST/AddTVShowSeasonEpisode")]
+        [Route("POST/AddTVShowEpisode")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
 
         public async Task<ActionResult<ApiResponseDto>> AddNewSeasonEpisode([FromBody] TVShowEpisodeToInsertDto tVShowEpisodeToInsert)
@@ -68,7 +68,7 @@ namespace Netflix_Clone.API.Controllers
 
 
         [HttpDelete]
-        [Route("DELETE/DeleteSeasonEpisode")]
+        [Route("DELETE/DeleteEpisode")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto>> DeleteSeasonEpisode([FromBody] TVShowSeasonEpisodeToDeleteDto tVShowSeasonEpisodeToDeleteDto)
         {
