@@ -16,9 +16,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<Director> ContentDirectors { get; set; }
         public DbSet<UserWatchHistory> UsersWatchHistories { get; set; }
         public DbSet<ContentDownload> UsersDownloads { get; set; }
+        public DbSet<UserWatchList> UsersWatchLists { get; set; }
+        public DbSet<WatchListContent> WatchListsContents { get; set; }
 
         public DbSet<Content> Contents { get; set; }
         public DbSet<ContentActor> ContentsActors { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ContentTag> ContentsTags { get; set; }
         public DbSet<Award> Awards { get; set; }
         public DbSet<ContentAward> ContentAwards { get; set; }
         public DbSet<ContentGenre> ContentGenres { get; set; }
@@ -31,12 +35,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Contexts
         public DbSet<TVShow> TVShows { get; set; }
         public DbSet<TVShowSeason> TVShowsSeasons { get; set; }
         public DbSet<TVShowEpisode> TVShowEpisodes { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server = .; Database =NetflixCloneDb; Integrated Security = SSPI; TrustServerCertificate = True;");
-        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

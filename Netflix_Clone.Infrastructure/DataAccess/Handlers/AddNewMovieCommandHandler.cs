@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.IServices;
@@ -33,6 +34,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
         public async Task<ApiResponseDto> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
         {
+            var IsMovieExists = applicationDbContext
+                  .Movies
+                  .Any(x => x.Title == request.movieToInsertDto.Title);
+
+            if(IsMovieExists)
+            {
+                throw new InsertionException($"The movie with title {request.movieToInsertDto.Title} is already exist");
+            }
+
             var movie = request.movieToInsertDto.Adapt<Movie>();
 
             if (movie is null)
@@ -54,9 +64,32 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             // save to the database
             try
             {
+                var contentTags = await applicationDbContext
+                .Tags
+                .ToListAsync() ?? new List<Tag>();
+
+                //add the new tags if exists
+                foreach (var tag in request.movieToInsertDto.Tags)
+                {
+                    if (!contentTags.Any(x => x.TagValue.Equals(tag.TagValue, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        contentTags.Add(new Tag { TagValue = tag.TagValue.ToLower() });
+                    }
+                }
+                await applicationDbContext.SaveChangesAsync();
+
+                movie.Tags.Clear();
+                var tagsDictionary = contentTags.ToDictionary(k => k.TagValue.ToLower(), v => v);
+                foreach (var tag in request.movieToInsertDto.Tags)
+                {
+                    movie.Tags.Add(tagsDictionary[tag.TagValue.ToLower()]);
+                }
+
+
                 logger.LogTrace($"Try to save the movie info in the database");
 
                 await applicationDbContext.Movies.AddAsync(movie);
+
                 await applicationDbContext.SaveChangesAsync();
 
                 logger.LogTrace($"The movie added to the database successfully");
@@ -77,7 +110,5 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 throw new InsertionException(ex.Message);
             }
         }
-
-
     }
 }

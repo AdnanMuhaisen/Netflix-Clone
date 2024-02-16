@@ -22,8 +22,8 @@ namespace Netflix_Clone.Domain.Entities
         public int LanguageId { get; set; }
         public ContentLanguage ContentLanguage { get; set; } = default!;
 
-        public IEnumerable<Award> ContentAwards { get; set; } = new List<Award>();
-        public IEnumerable<ContentAward> ContentsAwards { get; set; } = new List<ContentAward>();
+        public ICollection<Award> ContentAwards { get; set; } = new List<Award>();
+        public ICollection<ContentAward> ContentsAwards { get; set; } = new List<ContentAward>();
 
         public int ContentGenreId { get; set; }
         //public ContentGenre Genre { get; set; }
@@ -32,18 +32,23 @@ namespace Netflix_Clone.Domain.Entities
         public int DirectorId { get; set; }
         //public Director Director { get; set; }
 
-        public IEnumerable<Actor> Actors { get; set; } = new List<Actor>();
-        public IEnumerable<ContentActor> ContentsActors { get; set; } = new List<ContentActor>();
-
-        public IEnumerable<ApplicationUser> WatchedBy { get; set; } = new List<ApplicationUser>();
-        public IEnumerable<UserWatchHistory> UsersHistory { get; set; } = new List<UserWatchHistory>();
-
-        public IEnumerable<Tag> Tags { get; set; } = new List<Tag>();
-        public IEnumerable<ContentTag> ContentsTags { get; set; } = new List<ContentTag>();
+        public ICollection<Actor> Actors { get; set; } = new List<Actor>();
+        public ICollection<ContentActor> ContentsActors { get; set; } = new List<ContentActor>();
+               
+        public ICollection<ApplicationUser> WatchedBy { get; set; } = new List<ApplicationUser>();
+        public ICollection<UserWatchHistory> UsersHistory { get; set; } = new List<UserWatchHistory>();
+               
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+        public ICollection<ContentTag> ContentsTags { get; set; } = new List<ContentTag>();
 
 
         public ICollection<ApplicationUser> DownloadedBy { get; set; } = new List<ApplicationUser>();
         public ICollection<ContentDownload> ContentsDownloads { get; set; } = new List<ContentDownload>();
+
+        public ICollection<UserWatchList> ExistsInWatchLists { get; set; } = new List<UserWatchList>();
+        public ICollection<WatchListContent> WatchListsContents { get; set; } = new List<WatchListContent>();
+
+
 
         public override bool Equals(object? obj)
         {

@@ -701,6 +701,49 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.ToTable("tbl_UsersWatchHistory", (string)null);
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("tbl_UsersWatchLists", (string)null);
+                });
+
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.WatchListContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WatchListId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContentId");
+
+                    b.HasIndex("WatchListId");
+
+                    b.ToTable("tbl_WatchListsContents", (string)null);
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Movie", b =>
                 {
                     b.HasBaseType("Netflix_Clone.Domain.Entities.Content");
@@ -961,6 +1004,36 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("Content");
                 });
 
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchList", b =>
+                {
+                    b.HasOne("Netflix_Clone.Domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithOne("WatchList")
+                        .HasForeignKey("Netflix_Clone.Domain.Entities.UserWatchList", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.WatchListContent", b =>
+                {
+                    b.HasOne("Netflix_Clone.Domain.Entities.Content", "Content")
+                        .WithMany("WatchListsContents")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Netflix_Clone.Domain.Entities.UserWatchList", "WatchList")
+                        .WithMany("WatchListsContents")
+                        .HasForeignKey("WatchListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
+
+                    b.Navigation("WatchList");
+                });
+
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("ContentsDownloads");
@@ -968,6 +1041,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("UsersHistory");
 
                     b.Navigation("UsersSubscriptionPlans");
+
+                    b.Navigation("WatchList")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Award", b =>
@@ -986,6 +1062,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Navigation("ContentsTags");
 
                     b.Navigation("UsersHistory");
+
+                    b.Navigation("WatchListsContents");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.ContentGenre", b =>
@@ -1018,6 +1096,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.Tag", b =>
                 {
                     b.Navigation("ContentsTags");
+                });
+
+            modelBuilder.Entity("Netflix_Clone.Domain.Entities.UserWatchList", b =>
+                {
+                    b.Navigation("WatchListsContents");
                 });
 
             modelBuilder.Entity("Netflix_Clone.Domain.Entities.TVShow", b =>

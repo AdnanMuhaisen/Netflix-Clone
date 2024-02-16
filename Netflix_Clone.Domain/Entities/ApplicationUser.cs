@@ -23,5 +23,7 @@ namespace Netflix_Clone.Domain.Entities
 
         public ICollection<Content> Downloads { get; set; } = new List<Content>();
         public ICollection<ContentDownload> ContentsDownloads { get; set; } = new List<ContentDownload>();
+
+        public UserWatchList WatchList { get; set; } = default!;
     }
 }

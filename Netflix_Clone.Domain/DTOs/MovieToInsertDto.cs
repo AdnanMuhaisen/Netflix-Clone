@@ -13,7 +13,7 @@ namespace Netflix_Clone.Domain.DTOs
         [Required, Range(1, 2)] public int LanguageId { get; set; }
         [Required] public int ContentGenreId { get; set; }
         [Required] public int DirectorId { get; set; }
-        public int TotalNumberOfDownloads { get; set; } = 0;
-        public bool IsAvailableToDownload { get; set; }
+        [Required] public bool IsAvailableToDownload { get; set; }
+        public List<ContentTagDto> Tags { get; set; } = new List<ContentTagDto>();
     }
 }

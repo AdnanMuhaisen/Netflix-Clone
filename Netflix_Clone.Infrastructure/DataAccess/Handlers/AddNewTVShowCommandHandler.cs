@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.DTOs;
@@ -52,6 +53,27 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
 
             try
             {
+                var contentTags = await applicationDbContext
+               .Tags
+               .ToListAsync() ?? new List<Tag>();
+
+                //add the new tags if exists
+                foreach (var tag in request.tVShowToInsertDto.Tags)
+                {
+                    if (!contentTags.Any(x => x.TagValue.Equals(tag.TagValue, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        contentTags.Add(new Tag { TagValue = tag.TagValue.ToLower() });
+                    }
+                }
+                await applicationDbContext.SaveChangesAsync();
+
+                tvShowToInsert.Tags.Clear();
+                var tagsDictionary = contentTags.ToDictionary(k => k.TagValue.ToLower(), v => v);
+                foreach (var tag in request.tVShowToInsertDto.Tags)
+                {
+                    tvShowToInsert.Tags.Add(tagsDictionary[tag.TagValue.ToLower()]);
+                }
+
                 var info = Directory.CreateDirectory(pathOfDirectoryToInsert);
 
                 applicationDbContext.TVShows.Add(tvShowToInsert);
