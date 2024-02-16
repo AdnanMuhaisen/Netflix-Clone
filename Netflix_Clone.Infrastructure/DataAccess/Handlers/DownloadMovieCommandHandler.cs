@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.IServices;
@@ -35,7 +36,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
         {
             logger.LogTrace("The download movie command handler is started to execute");
 
-            if(!Directory.Exists(request.downloadMovieRequestDto.PathToDownloadFor))
+            request.downloadMovieRequestDto.PathToDownloadFor =
+                (string.IsNullOrEmpty(request.downloadMovieRequestDto.PathToDownloadFor))
+                ? options.Value.DefaultPathToDownload
+                : request.downloadMovieRequestDto.PathToDownloadFor;
+
+            if (!Directory.Exists(request.downloadMovieRequestDto.PathToDownloadFor))
             {
                 logger.LogError("Can not download the movie to a non existing location : {location}!", request.downloadMovieRequestDto.PathToDownloadFor);
 
@@ -45,7 +51,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     Message = $"Can not download the movie in this location : {request.downloadMovieRequestDto.PathToDownloadFor}"
                 };
             }
-            // check if the user verified to download the movie
+
             logger.LogTrace("Try to get the target movie with id {id}", request.downloadMovieRequestDto.MovieId);
 
             var targetMovie = await applicationDbContext
@@ -63,18 +69,54 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             {
                 logger.LogError("Can not download move that is unavailable to download");
 
-                throw new MovieDownloadException("The movie is unavailable to download");
+                throw new ContentDownloadException("The movie is unavailable to download");
+            }
+
+            //validate if the user verified to download based on user subscription plan
+            var activeUserSubscriptionPlan = await applicationDbContext
+                .UsersSubscriptions
+                .AsNoTracking()
+                .Include(x => x.SubscriptionPlan)
+                .ThenInclude(x => x.PlanFeatures)
+                .Where(x => x.UserId == request.userId && DateTime.UtcNow <= x.EndDate)
+                .FirstOrDefaultAsync();
+
+            if(activeUserSubscriptionPlan is null)
+            {
+                throw new ContentDownloadException($"A user with an ID {request.userId} does not have an active subscription !");
+            }
+
+            //check based on the plan and the previous user downloads if the 
+            //user can download more movies
+            var numberOfUserDownloadsForTheTargetSubscription = applicationDbContext
+                .UsersDownloads
+                .AsNoTracking()
+                .Where(x => x.ApplicationUserId == request.userId && x.DownloadedAt >= activeUserSubscriptionPlan.StartDate)
+                .Count();
+
+            var downloadFeatureOfTheSubscriptionPlan = activeUserSubscriptionPlan
+                .SubscriptionPlan
+                .PlanFeatures
+                .Where(x => x.Feature.StartsWith("Download", StringComparison.OrdinalIgnoreCase))
+                .First();
+
+            int downloadTimesSupportedByTheSubscriptionPlan = int.Parse(downloadFeatureOfTheSubscriptionPlan
+                .Feature
+                .Where(x => Char.IsDigit(x))
+                .First()
+                .ToString()
+                );
+
+            if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
+            {
+                throw new ContentDownloadException($"The user can not download the movie because it is exceeds the times of " +
+                    $"downloads supported by the subscription !");
             }
 
             logger.LogTrace("The target movie with id : {id} is retrieved", targetMovie.Id);
 
             string encodedLocationForTheTargetMovie = Encoding.UTF8.GetString(Convert.FromBase64String(targetMovie.Location));
             string targetMovieFilePath = Path.Combine(options.Value.TargetDirectoryToSaveTo, encodedLocationForTheTargetMovie);
-
-            request.downloadMovieRequestDto.PathToDownloadFor =
-                (string.IsNullOrEmpty(request.downloadMovieRequestDto.PathToDownloadFor))
-                ? options.Value.DefaultPathToDownload
-                : request.downloadMovieRequestDto.PathToDownloadFor;
 
             try
             {
@@ -99,7 +141,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     .AddAsync(new ContentDownload
                     {
                         ApplicationUserId = request.userId,
-                        ContentId = request.downloadMovieRequestDto.MovieId
+                        ContentId = request.downloadMovieRequestDto.MovieId,
+                        DownloadedAt = DateTime.UtcNow
                     });
 
                 await applicationDbContext.SaveChangesAsync();

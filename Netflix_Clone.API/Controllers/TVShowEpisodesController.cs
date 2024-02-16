@@ -125,13 +125,20 @@ namespace Netflix_Clone.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto,
-                    User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+                try
+                {
+                    var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto,
+                        User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
-                var response = await mediator.Send(command);
-                return (response.Result is null)
-                    ? BadRequest(response)
-                    : Ok(response);
+                    var response = await mediator.Send(command);
+                    return (response.Result is null)
+                        ? BadRequest(response)
+                        : Ok(response);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
             }
             else
             {

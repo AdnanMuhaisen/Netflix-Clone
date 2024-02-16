@@ -382,6 +382,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Data.Migrations
                     b.Property<int>("ContentId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("DownloadedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2024, 2, 16, 8, 20, 34, 172, DateTimeKind.Utc).AddTicks(5086));
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");

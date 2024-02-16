@@ -41,7 +41,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             var doesTheUserHaveActiveSubscription = await applicationDbContext
                 .UsersSubscriptions
                 .AsNoTracking()
-                .Where(x => x.EndDate <= DateTime.UtcNow || !x.IsEnded)
+                .Where(x => x.UserId == request.userId && (x.EndDate <= DateTime.UtcNow || !x.IsEnded))
                 .AnyAsync();
 
             if(doesTheUserHaveActiveSubscription)
@@ -60,7 +60,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddMonths(1),
                 IsEnded = false,
-
             };
 
             try

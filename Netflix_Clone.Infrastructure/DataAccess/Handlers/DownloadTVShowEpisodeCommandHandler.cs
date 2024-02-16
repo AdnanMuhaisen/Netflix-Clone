@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Entities;
+using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
@@ -52,6 +53,48 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     Message = $"The {targetTVShow.Title} TvShow Is unavailable to download"
                 };
             }
+
+            //validate if the user verified to download based on user subscription plan
+            var activeUserSubscriptionPlan = await applicationDbContext
+                .UsersSubscriptions
+                .AsNoTracking()
+                .Include(x => x.SubscriptionPlan)
+                .ThenInclude(x => x.PlanFeatures)
+                .Where(x => x.UserId == request.userId && DateTime.UtcNow <= x.EndDate)
+                .FirstOrDefaultAsync();
+
+            if (activeUserSubscriptionPlan is null)
+            {
+                throw new ContentDownloadException($"A user with an ID {request.userId} does not have an active subscription !");
+            }
+
+            //check based on the plan and the previous user downloads if the 
+            //user can download more movies
+            var numberOfUserDownloadsForTheTargetSubscription = applicationDbContext
+                .UsersDownloads
+                .AsNoTracking()
+                .Where(x => x.ApplicationUserId == request.userId && x.DownloadedAt >= activeUserSubscriptionPlan.StartDate)
+                .Count();
+
+            var downloadFeatureOfTheSubscriptionPlan = activeUserSubscriptionPlan
+                .SubscriptionPlan
+                .PlanFeatures
+                .Where(x => x.Feature.StartsWith("Download", StringComparison.OrdinalIgnoreCase))
+                .First();
+
+            int downloadTimesSupportedByTheSubscriptionPlan = int.Parse(downloadFeatureOfTheSubscriptionPlan
+                .Feature
+                .Where(x => Char.IsDigit(x))
+                .First()
+                .ToString()
+                );
+
+            if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
+            {
+                throw new ContentDownloadException($"The user can not download the movie because it is exceeds the times of " +
+                    $"downloads supported by the subscription !");
+            }
+
 
             var targetSeason = targetTVShow
                 .Seasons
