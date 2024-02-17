@@ -9,14 +9,9 @@ using System.Text;
 
 namespace Netflix_Clone.Application.Services
 {
-    public class JwtTokenGenerator : IJwtTokenGenerator
+    public class JwtTokenGenerator(IOptions<JwtOptions> options) : IJwtTokenGenerator
     {
-        private readonly IOptions<JwtOptions> options;
-
-        public JwtTokenGenerator(IOptions<JwtOptions> options)
-        {
-            this.options = options;
-        }
+        private readonly IOptions<JwtOptions> options = options;
 
         public string GenerateToken(ApplicationUser applicationUser,IEnumerable<string> UserRoles)
         {

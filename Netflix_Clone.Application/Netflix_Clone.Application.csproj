@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Netflix_Clone.Domain\Netflix_Clone.Domain.csproj" />
-    <ProjectReference Include="..\Netflix_Clone.SharedPackages\Netflix_Clone.SharedPackages.csproj" />
+    <ProjectReference Include="..\Netflix_Clone.Shared\Netflix_Clone.Shared.csproj" />
   </ItemGroup>
 
 </Project>

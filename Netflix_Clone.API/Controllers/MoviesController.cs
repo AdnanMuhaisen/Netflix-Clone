@@ -5,10 +5,11 @@ using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.Checkers;
 using Netflix_Clone.Application.Services.FileOperations;
 using Netflix_Clone.Domain;
-using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Exceptions;
-using Netflix_Clone.Infrastructure.DataAccess.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Queries;
+using Netflix_Clone.Infrastructure.DataAccess.Common.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.Movies.Queries;
+using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
 namespace Netflix_Clone.API.Controllers

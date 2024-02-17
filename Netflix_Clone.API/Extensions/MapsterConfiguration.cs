@@ -1,6 +1,6 @@
 ﻿using Mapster;
-using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Entities;
+using Netflix_Clone.Shared.DTOs;
 
 namespace Netflix_Clone.API.Extensions
 {

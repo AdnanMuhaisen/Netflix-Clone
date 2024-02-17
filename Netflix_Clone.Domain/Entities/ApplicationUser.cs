@@ -16,7 +16,7 @@ namespace Netflix_Clone.Domain.Entities
 
         //relationships
         public IEnumerable<Content> UserHistory { get; set; } = new List<Content>();
-        public IEnumerable<UserWatchHistory> UsersHistory { get; set; } = new List<UserWatchHistory>();
+        public IEnumerable<UserWatchHistory> UsersHistory { get; set; } = [];
 
         public IEnumerable<SubscriptionPlan> SubscriptionPlans { get; set; } = new List<SubscriptionPlan>();
         public IEnumerable<UserSubscriptionPlan> UsersSubscriptionPlans { get; set; } = new List<UserSubscriptionPlan>();

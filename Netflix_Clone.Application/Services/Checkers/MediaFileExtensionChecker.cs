@@ -1,4 +1,4 @@
-﻿using Netflix_Clone.Domain.Enums;
+﻿using Netflix_Clone.Shared.Enums;
 
 namespace Netflix_Clone.Application.Services.Checkers
 {

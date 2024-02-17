@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Netflix_Clone.Domain.DTOs;
-using Netflix_Clone.Infrastructure.DataAccess.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Queries;
+using Netflix_Clone.Infrastructure.DataAccess.TVShows.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.TVShows.Queries;
+using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
 namespace Netflix_Clone.API.Controllers

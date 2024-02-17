@@ -1,7 +1,6 @@
-﻿using Netflix_Clone.Domain.Enums;
+﻿using Microsoft.Extensions.Logging;
+using Netflix_Clone.Shared.Enums;
 using System.IO.Compression;
-using Serilog;
-using Microsoft.Extensions.Logging;
 
 namespace Netflix_Clone.Application.Services.FileOperations
 {

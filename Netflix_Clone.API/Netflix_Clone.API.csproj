@@ -15,7 +15,6 @@
     <ProjectReference Include="..\Netflix_Clone.Application\Netflix_Clone.Application.csproj" />
     <ProjectReference Include="..\Netflix_Clone.Domain\Netflix_Clone.Domain.csproj" />
     <ProjectReference Include="..\Netflix_Clone.Infrastructure\Netflix_Clone.Infrastructure.csproj" />
-    <ProjectReference Include="..\Netflix_Clone.SharedPackages\Netflix_Clone.SharedPackages.csproj" />
   </ItemGroup>
 
   <ItemGroup>

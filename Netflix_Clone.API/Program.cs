@@ -11,6 +11,7 @@ using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.Entities;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
+using Netflix_Clone.Infrastructure.DataAccess.Repositories.UnitOfWork;
 using Serilog;
 
 
@@ -64,6 +65,8 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
 });
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.RegisterMapsterConfigurations();
 builder.Services.AddScoped<IFileCompressor, FileCompressor>();

@@ -3,9 +3,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Netflix_Clone.Domain.DTOs;
 using Netflix_Clone.Domain.Options;
-using Netflix_Clone.Infrastructure.DataAccess.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.Authentication.Commands;
+using Netflix_Clone.Shared.DTOs;
 
 namespace Netflix_Clone.API.Controllers
 {
@@ -37,7 +37,7 @@ namespace Netflix_Clone.API.Controllers
             }
             else
             {
-                return BadRequest(new RegistrationResponseDto { IsRegistered = false, Message = "Invalid Model State" });
+                return null!;// BadRequest(new RegistrationResponseDto { IsRegistered = false, Message = "Invalid Model State" });
             }
         }
 
@@ -67,14 +67,13 @@ namespace Netflix_Clone.API.Controllers
             {
                 var command = new UserLoginCommand(loginRequestDto, HttpContext);
                 var result = await mediator.Send(command);
-                return (result.UserDto is null) ? BadRequest(result) : Ok(result);
+                return null!;//(result.UserDto is null) ? BadRequest(result) : Ok(result);
             }
             else
             {
                 return BadRequest(new LoginResponseDto
                 {
-                    UserDto = default!,
-                    Message = "Invalid Model State"
+                    UserDto = default!
                 });
             }
         }
