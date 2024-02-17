@@ -14,13 +14,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 {
     public class DownloadTVShowEpisodeCommandHandler(ILogger<DownloadTVShowEpisodeCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<DownloadTVShowEpisodeCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) 
+        : IRequestHandler<DownloadTVShowEpisodeCommand, ApiResponseDto<string>>
     {
         private readonly ILogger<DownloadTVShowEpisodeCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(DownloadTVShowEpisodeCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<string>> Handle(DownloadTVShowEpisodeCommand request, CancellationToken cancellationToken)
         {
             var targetTVShow = applicationDbContext
                 .TVShows
@@ -32,19 +33,21 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (targetTVShow is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    Message = "Can not find the target TV Show"
+                    Message = "Can not find the target TV Show",
+                    IsSucceed = true
                 };
             }
 
             if (!targetTVShow.IsAvailableToDownload)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    Message = $"The {targetTVShow.Title} TvShow Is unavailable to download"
+                    Message = $"The {targetTVShow.Title} TvShow Is unavailable to download",
+                    IsSucceed = true
                 };
             }
 
@@ -56,9 +59,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 .ThenInclude(x => x.PlanFeatures)
                 .AsSplitQuery()
                 .Where(x => x.UserId == request.userId && DateTime.UtcNow <= x.EndDate)
-                .FirstOrDefaultAsync()
-                ?? throw new ContentDownloadException($"A user with an ID {request.userId} does not have an active subscription !");
-
+                .FirstOrDefaultAsync();
+                
+            if(activeUserSubscriptionPlan is null)
+            {
+                return new ApiResponseDto<string>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"A user with an ID {request.userId} does not have an active subscription !"
+                };
+            }
 
             //check based on the plan and the previous user downloads if the 
             //user can download more movies
@@ -83,8 +94,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
             {
-                throw new ContentDownloadException($"The user can not download the movie because it is exceeds the times of " +
-                    $"downloads supported by the subscription !");
+                return new ApiResponseDto<string>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The user can not download the movie because it is exceeds the times of " +
+                    $"downloads supported by the subscription !"
+                };
             }
 
 
@@ -104,10 +120,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (!File.Exists(targetEpisodeFilePath))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    Message = $"The episode file can not be found"
+                    Message = $"The episode file can not be found",
+                    IsSucceed = true
                 };
             }
 
@@ -140,10 +157,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<string>
                 {
                     Result = nameOfTheFileToDownload,
-                    Message = "Downloaded successfully"
+                    Message = "Downloaded successfully",
+                    IsSucceed = true
                 };
             }
             catch (Exception ex)
@@ -156,11 +174,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 }
 
                 //log
-
-                return new ApiResponseDto
+                return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    Message = "Can not download the episode"
+                    Message = "Can not download the episode",
+                    IsSucceed = false
                 };
             }
         }

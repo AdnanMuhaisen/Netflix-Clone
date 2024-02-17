@@ -12,12 +12,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
     public class GetAllMoviesQueryHandler(
         ApplicationDbContext applicationDbContext,
         ILogger<GetAllMoviesQueryHandler> logger)
-        : IRequestHandler<GetAllMoviesQuery, ApiResponseDto>
+        : IRequestHandler<GetAllMoviesQuery, ApiResponseDto<IEnumerable<MovieDto>>>
     {
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly ILogger<GetAllMoviesQueryHandler> logger = logger;
 
-        public async Task<ApiResponseDto> Handle(GetAllMoviesQuery request,
+        public async Task<ApiResponseDto<IEnumerable<MovieDto>>> Handle(GetAllMoviesQuery request,
             CancellationToken cancellationToken)
         {
             logger.LogTrace("The Get All Movies handler is started");
@@ -42,7 +42,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             logger.LogTrace($"The movies are retrieved from the database");
 
-            return new ApiResponseDto { Result = movies };
+            return new ApiResponseDto<IEnumerable<MovieDto>> 
+            { 
+                Result = movies,
+                IsSucceed = true
+            };
         }
     }
 }

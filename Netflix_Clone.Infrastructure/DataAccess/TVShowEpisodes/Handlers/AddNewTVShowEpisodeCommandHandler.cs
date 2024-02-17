@@ -15,26 +15,46 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 {
     public class AddNewTVShowEpisodeCommandHandler(ILogger<AddNewTVShowEpisodeCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<AddNewTVShowEpisodeCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options
+        ) 
+        : IRequestHandler<AddNewTVShowEpisodeCommand, ApiResponseDto<TVShowEpisodeDto>>
     {
         private readonly ILogger<AddNewTVShowEpisodeCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(AddNewTVShowEpisodeCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<TVShowEpisodeDto>> Handle(AddNewTVShowEpisodeCommand request, CancellationToken cancellationToken)
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
-                .Include(x=>x.Seasons)
-                .ThenInclude(i=>i.Episodes)
+                .Include(x => x.Seasons)
+                .ThenInclude(i => i.Episodes)
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(x => x.Id == request.TVShowEpisodeToInsertDto.TVShowId)
-                ?? throw new InsertionException($"The target TV Show with Id: {request.TVShowEpisodeToInsertDto.TVShowId} does not exist !");
+                .FirstOrDefaultAsync(x => x.Id == request.TVShowEpisodeToInsertDto.TVShowId);
             
+            if(targetTVShow is null)
+            {
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The target TV Show with Id: {request.TVShowEpisodeToInsertDto.TVShowId} does not exist !"
+                };
+            }
+
             var targetSeason = targetTVShow
                 .Seasons
-                .FirstOrDefault(x => x.Id == request.TVShowEpisodeToInsertDto.SeasonId)
-                ?? throw new InsertionException($"The target TV Show season with Id: {request.TVShowEpisodeToInsertDto.SeasonId} does not exist !");
+                .FirstOrDefault(x => x.Id == request.TVShowEpisodeToInsertDto.SeasonId);
+                
+            if(targetSeason is null)
+            {
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The target TV Show season with Id: {request.TVShowEpisodeToInsertDto.SeasonId} does not exist !"
+                };
+            }
             
             var IsTargetEpisodeExist = targetSeason
                 .Episodes
@@ -42,10 +62,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (IsTargetEpisodeExist)
             {
-                throw new InsertionException($"The target Episode with number : " +
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The target Episode with number : " +
                     $"{request.TVShowEpisodeToInsertDto.EpisodeNumber} in the season number " +
                     $"{request.TVShowEpisodeToInsertDto.SeasonNumber} in the TV Show with id : " +
-                    $"{request.TVShowEpisodeToInsertDto.TVShowId} is already exist!");
+                    $"{request.TVShowEpisodeToInsertDto.TVShowId} is already exist!"
+                };
             }
 
             //episode file name "{TVShow Title}-{Season number}-{Episode number}" 
@@ -55,7 +80,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!Directory.Exists(pathOfTheTVShowDirectory))
             {
-                throw new InsertionException($"The directory of the target TV Show with id {request.TVShowEpisodeToInsertDto.TVShowId} does not exist");
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The directory of the target TV Show with id {request.TVShowEpisodeToInsertDto.TVShowId} does not exist"
+                };
             }
 
             var pathOfTheTargetSeason = new StringBuilder(Path.Combine(pathOfTheTVShowDirectory,
@@ -63,7 +93,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (!Directory.Exists(pathOfTheTargetSeason.ToString()))
             {
-                throw new InsertionException($"The directory of the target TV Show season with id {request.TVShowEpisodeToInsertDto.SeasonId} does not exist");
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The directory of the target TV Show season with id {request.TVShowEpisodeToInsertDto.SeasonId} does not exist"
+                };
             }
 
             string episodeFilePath = Path.Combine(pathOfTheTargetSeason.ToString(),
@@ -74,9 +109,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(File.Exists(episodeFilePath))
             {
-                throw new InsertionException($"The episode of the TVShow with id : {targetTVShow.Id}" +
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The episode of the TVShow with id : {targetTVShow.Id}" +
                     $" in season number {targetSeason.SeasonNumber} with episode number : {request.TVShowEpisodeToInsertDto.EpisodeNumber}" +
-                    $" is already exist");
+                    $" is already exist"
+                };
             }
 
             //create the file and save in the database:
@@ -108,13 +148,23 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto { Result = episodeToInsert.Adapt<TVShowEpisodeDto>() };
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = episodeToInsert.Adapt<TVShowEpisodeDto>(),
+                    IsSucceed = true,
+                    Message = string.Empty
+                };
             }
             catch(Exception ex)
             {
                 File.Delete(episodeFilePath);
 
-                throw new InsertionException($"{ex.Message}");
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = episodeToInsert.Adapt<TVShowEpisodeDto>(),
+                    IsSucceed = false,
+                    Message = "An error occur while trying to add the episode"
+                };
             }
         }
     }

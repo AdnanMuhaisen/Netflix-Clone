@@ -9,12 +9,13 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 {
     internal class AddToUserWatchListCommandHandler(ILogger<AddToUserWatchListCommandHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<AddToUserWatchListCommand, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) 
+        : IRequestHandler<AddToUserWatchListCommand, ApiResponseDto<bool>>
     {
         private readonly ILogger<AddToUserWatchListCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(AddToUserWatchListCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<bool>> Handle(AddToUserWatchListCommand request, CancellationToken cancellationToken)
         {
             var targetContentToAdd = await applicationDbContext
                 .Contents
@@ -23,10 +24,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (targetContentToAdd is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
-                    Message = "Can not find the required content"
+                    Result = false,
+                    Message = "Can not find the required content",
+                    IsSucceed = true
                 };
             }
 
@@ -54,10 +56,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 }
                 catch (Exception ex)
                 {
-                    return new ApiResponseDto
+                    return new ApiResponseDto<bool>
                     {
-                        Result = null!,
-                        Message = $"Can not create a watch list for the user with id {request.userId}"
+                        Result = false,
+                        Message = $"Can not create a watch list for the user with id {request.userId}",
+                        IsSucceed = false
                     };
                 }
             }
@@ -70,10 +73,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (IsTheContentInTheWatchList)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = new { },
-                    Message = $"The content with id : {request.contentId} is already in the watchlist"
+                    Result = true,
+                    Message = $"The content with id : {request.contentId} is already in the watchlist",
+                    IsSucceed = true
                 };
             }
 
@@ -83,17 +87,19 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = new { }
+                    Result = true,
+                    IsSucceed = true
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
-                    Message = $"Can not add the content with id : {request.contentId} to the watch list"
+                    Result = false,
+                    Message = $"Can not add the content with id : {request.contentId} to the watch list",
+                    IsSucceed = false
                 };
             }
         }

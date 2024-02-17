@@ -10,12 +10,12 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class GetTVShowsByQueryHandler(ILogger<GetTVShowsByQueryHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<GetTVShowsByQuery, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) : IRequestHandler<GetTVShowsByQuery, ApiResponseDto<IEnumerable<TVShowDto>>>
     {
         private readonly ILogger<GetTVShowsByQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetTVShowsByQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<TVShowDto>>> Handle(GetTVShowsByQuery request, CancellationToken cancellationToken)
         {
             Func<TVShow, bool> tvShowsFilter = (tvShow) =>
             {
@@ -38,9 +38,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             tvShows ??= new List<TVShow>();
 
-            return new ApiResponseDto
+            return new ApiResponseDto<IEnumerable<TVShowDto>>
             {
-                Result = tvShows.Adapt<List<TVShowDto>>()
+                Result = tvShows.Adapt<List<TVShowDto>>(),
+                IsSucceed = true
             };
         }
     }

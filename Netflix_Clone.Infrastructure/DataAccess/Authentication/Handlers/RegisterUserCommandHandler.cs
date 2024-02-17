@@ -12,13 +12,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
     public class RegisterUserCommandHandler(ILogger<RegisterUserCommandHandler> logger,
         UserManager<ApplicationUser> userManager,
         IOptions<UserRolesOptions> options)
-        : IRequestHandler<RegisterUserCommand, ApiResponseDto>
+        : IRequestHandler<RegisterUserCommand, ApiResponseDto<RegistrationResponseDto>>
     {
         private readonly ILogger<RegisterUserCommandHandler> logger = logger;
         private readonly UserManager<ApplicationUser> userManager = userManager;
         private readonly IOptions<UserRolesOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<RegistrationResponseDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The registration command handler is start to execute");
 
@@ -26,13 +26,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             {
                 logger.LogError("The user with email : {email} is already exist", request.registrationRequestDto.Email);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<RegistrationResponseDto>
                 {
                     Result = new RegistrationResponseDto
                     {
                         IsRegistered = false,
                     },
-                    Message = $"The user with the email : {request.registrationRequestDto.Email} is already exist"
+                    Message = $"The user with the email : {request.registrationRequestDto.Email} is already exist",
+                    IsSucceed = true
                 };
             }
 
@@ -42,13 +43,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 logger.LogError("The user with Name : {name} is already exist",
                     $"{request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName}");
 
-                return new ApiResponseDto
+                return new ApiResponseDto<RegistrationResponseDto>
                 {
                     Result = new RegistrationResponseDto
                     {
                         IsRegistered = false,
                     },
-                    Message = $"The user with the UserName : {request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName} is already exist"
+                    Message = $"The user with the UserName : {request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName} is already exist",
+                    IsSucceed = true
                 };
             }
 
@@ -69,13 +71,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 logger.LogError("An error occur while saving the user with email : {email}",
                     request.registrationRequestDto.Email);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<RegistrationResponseDto>
                 {
                     Result = new RegistrationResponseDto
                     {
                         IsRegistered = false,
                     },
-                    Message = string.Join(',', userCreationResult.Errors.Select(x => x.Description))
+                    Message = string.Join(',', userCreationResult.Errors.Select(x => x.Description)),
+                    IsSucceed = true
                 };
             }
 
@@ -87,13 +90,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             {
                 logger.LogError("An Error occur while finding the user with email : {email} ", request.registrationRequestDto.Email);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<RegistrationResponseDto>
                 {
                     Result = new RegistrationResponseDto
                     {
                         IsRegistered = true,
                     },
-                    Message = "Can not find the user after it is added successfully"
+                    Message = "Can not find the user after it is added successfully",
+                    IsSucceed = true
                 };
             }
 
@@ -103,20 +107,21 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
             {
                 logger.LogError("An Error occur while adding the user with id : {id} to the USER role", registeredUser.Id);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<RegistrationResponseDto>
                 {
                     Result = new RegistrationResponseDto
                     {
                         IsRegistered = true,
                     },
                     Message = $"The user is registered successfully ,but can not add this user to role due to " +
-                    $"this errors : {string.Join(',', addToRoleResult.Errors.Select(x => x.Description))}"
+                    $"this errors : {string.Join(',', addToRoleResult.Errors.Select(x => x.Description))}",
+                    IsSucceed = true
                 };
             }
 
             logger.LogTrace("The user with id : {id} is added to the USER Role Successfully", registeredUser.Id);
 
-            return new ApiResponseDto
+            return new ApiResponseDto<RegistrationResponseDto>
             {
                 Result = new RegistrationResponseDto
                 {
@@ -125,7 +130,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     Email = registeredUser.Email!,
                     IsRegistered = true,
                 },
-                Message = "Registered successfully"
+                Message = "Registered successfully",
+                IsSucceed = true
             };
         }
     }

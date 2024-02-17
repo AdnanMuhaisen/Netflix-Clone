@@ -1,10 +1,8 @@
 ﻿using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Netflix_Clone.Domain.Entities;
 using Netflix_Clone.Infrastructure.DataAccess.Common.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Repositories.UnitOfWork;
 using Netflix_Clone.Shared.DTOs;
 
@@ -12,12 +10,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 {
     public class AddToUserWatchHistoryCommandHandler(ILogger<AddToUserWatchHistoryCommandHandler> logger,
         IUnitOfWork unitOfWork) 
-        : IRequestHandler<AddToUserWatchHistoryCommand, ApiResponseDto>
+        : IRequestHandler<AddToUserWatchHistoryCommand, ApiResponseDto<bool>>
     {
         private readonly ILogger<AddToUserWatchHistoryCommandHandler> logger = logger;
         private readonly IUnitOfWork unitOfWork = unitOfWork;
 
-        public async Task<ApiResponseDto> Handle(AddToUserWatchHistoryCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<bool>> Handle(AddToUserWatchHistoryCommand request, CancellationToken cancellationToken)
         {
             bool IsTargetContentExist = unitOfWork
                 .ContentRepository
@@ -26,10 +24,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 
             if (!IsTargetContentExist)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
-                    Message = $"Can not Find the content with id {request.addToUserWatchHistoryRequestDto.ContentId}"
+                    Result = false,
+                    Message = $"Can not Find the content with id {request.addToUserWatchHistoryRequestDto.ContentId}",
+                    IsSucceed = true
                 };
             }
 
@@ -43,17 +42,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 
                 await unitOfWork.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = historyRecordToAdd.Adapt<UserWatchHistoryDto>()
+                    Result = true,
+                    Message = string.Empty,
+                    IsSucceed = true
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
-                    Message = $"Can not add the user history"
+                    Result = false,
+                    Message = $"Can not add the user history",
+                    IsSucceed = false
                 };
             }
         }

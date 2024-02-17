@@ -15,13 +15,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class AddNewTVShowCommandHandler(ILogger<AddNewTVShowCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<AddNewTVShowCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<AddNewTVShowCommand, ApiResponseDto<TVShowDto>>
     {
         private readonly ILogger<AddNewTVShowCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(AddNewTVShowCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<TVShowDto>> Handle(AddNewTVShowCommand request, CancellationToken cancellationToken)
         {
             var IsTheTargetShowExist = applicationDbContext
                 .TVShows
@@ -31,7 +31,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(IsTheTargetShowExist)
             {
-                throw new InsertionException($"The TV Show with title : {request.tVShowToInsertDto.Title} is already exist");
+                return new ApiResponseDto<TVShowDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The TV Show with title : {request.tVShowToInsertDto.Title} is already exist"
+                };
             }
 
             var tvShowToInsert = request.tVShowToInsertDto.Adapt<TVShow>();
@@ -72,13 +77,23 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 applicationDbContext.TVShows.Add(tvShowToInsert);
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto { Result = tvShowToInsert.Adapt<TVShowDto>() };
+                return new ApiResponseDto<TVShowDto>
+                {
+                    Result = tvShowToInsert.Adapt<TVShowDto>(),
+                    IsSucceed = true,
+                    Message = string.Empty
+                };
             }
             catch (Exception ex)
             {
                 Directory.Delete(pathOfDirectoryToInsert);
 
-                throw new InsertionException($"Can not add the TV-Show with title : {request.tVShowToInsertDto.Title} because this exception : {ex.Message}");
+                return new ApiResponseDto<TVShowDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"Can not add the TV-Show with title : {request.tVShowToInsertDto.Title} because this exception : {ex.Message}"
+                };
             }
         }
     }

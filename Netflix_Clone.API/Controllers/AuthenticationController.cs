@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Authentication.Commands;
 using Netflix_Clone.Shared.DTOs;
+using Netflix_Clone.Shared.Enums;
 
 namespace Netflix_Clone.API.Controllers
 {

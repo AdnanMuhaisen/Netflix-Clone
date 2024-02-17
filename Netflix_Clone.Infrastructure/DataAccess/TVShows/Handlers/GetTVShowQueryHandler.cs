@@ -13,13 +13,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class GetTVShowQueryHandler(ILogger<GetTVShowQueryHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetTVShowQuery, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetTVShowQuery, ApiResponseDto<TVShowDto>>
     {
         private readonly ILogger<GetTVShowQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(GetTVShowQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<TVShowDto>> Handle(GetTVShowQuery request, CancellationToken cancellationToken)
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
@@ -45,7 +45,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 }
             }
 
-            return new ApiResponseDto { Result = result };
+            return new ApiResponseDto<TVShowDto>
+            {
+                Result = result,
+                IsSucceed = true
+            };
         }
     }
 }

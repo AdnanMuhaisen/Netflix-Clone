@@ -7,7 +7,6 @@ using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Repositories.UnitOfWork;
 using Netflix_Clone.Shared.DTOs;
 using System.Text;
 
@@ -18,14 +17,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
         ApplicationDbContext applicationDbContext,
         IOptions<ContentMovieOptions> options,
         IFileManager fileManager) 
-        : IRequestHandler<DeleteMovieCommand, ApiResponseDto>
+        : IRequestHandler<DeleteMovieCommand, ApiResponseDto<bool>>
     {
         private readonly ILogger<DeleteMovieCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentMovieOptions> options = options;
         private readonly IFileManager fileManager = fileManager;
 
-        public async Task<ApiResponseDto> Handle(DeleteMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<bool>> Handle(DeleteMovieCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The delete movie handler is start to execute");
 
@@ -40,7 +39,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 logger.LogError("The movie with the ID = {id} was not found", request.contentId);
 
-                throw new EntityNotFoundException($"Movie with the id {request.contentId} was not found");
+                return new ApiResponseDto<bool>
+                {
+                    Result = false,
+                    IsSucceed = true,
+                    Message = $"The movie with the ID = {request.contentId} was not found"
+                };
             }
 
             // delete the movie content from the server:
@@ -53,9 +57,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(!IsOriginalFileDeleted)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
+                    Result = false,
+                    IsSucceed = true,
                     Message = "Can not delete the file"
                 };
             }
@@ -66,9 +71,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(!IsCompressedFileDeleted)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
+                    Result = false,
+                    IsSucceed = true,
                     Message = "Can not delete the compressed file"
                 };
             }
@@ -84,19 +90,22 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 logger.LogTrace("The movie with id = {id} is deleted from the database", targetMovieToDelete.Id);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
                     Result = true,
+                    IsSucceed = true,
+                    Message = string.Empty
                 };
             }
             catch (Exception ex)
             {
                 logger.LogError("The movie with id = {id} is failed to delete from the database due to this exception: {exMessage}", targetMovieToDelete.Id, ex.Message);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<bool>
                 {
-                    Result = null!,
-                    Message = ex.Message
+                    Result = false,
+                    IsSucceed = false,
+                    Message = "Can not delete the compressed file"
                 };
             }
         }

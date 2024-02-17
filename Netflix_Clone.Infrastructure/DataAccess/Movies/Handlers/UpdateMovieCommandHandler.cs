@@ -6,10 +6,8 @@ using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.IServices;
 using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.Entities;
-using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Repositories.UnitOfWork;
 using Netflix_Clone.Shared.DTOs;
 using System.Text;
 
@@ -18,14 +16,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
     public class UpdateMovieCommandHandler(ApplicationDbContext applicationDbContext,
         ILogger<UpdateMovieCommandHandler> logger,
         IFileManager fileManager,
-        IOptions<ContentMovieOptions> options) : IRequestHandler<UpdateMovieCommand, ApiResponseDto>
+        IOptions<ContentMovieOptions> options) : IRequestHandler<UpdateMovieCommand, ApiResponseDto<MovieDto>>
     {
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly ILogger<UpdateMovieCommandHandler> logger = logger;
         private readonly IFileManager fileManager = fileManager;
         private readonly IOptions<ContentMovieOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(UpdateMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<MovieDto>> Handle(UpdateMovieCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The update movie handler is start to execute");
 
@@ -38,7 +36,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 logger.LogError("The target movie to update with id {id} does not exist", request.movieDto.Id);
 
-                ArgumentNullException.ThrowIfNull($"can not find the movie {nameof(targetMovieToUpdate)}");
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = null!,
+                    Message = $"can not find the movie {nameof(targetMovieToUpdate)}",
+                    IsSucceed = true
+                };
             }
 
             //now try to update:
@@ -62,7 +65,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     logger.LogError("An error occur when try to delete the original file of the movie with id : {id}", request.movieDto.Id);
 
-                    throw new InvalidUpdateOperationException($"Can not delete the original file that contains this segment {currentFileName}");
+                    return new ApiResponseDto<MovieDto>
+                    {
+                        Result = null!,
+                        Message = $"Can not delete the original file that contains this segment {currentFileName}",
+                        IsSucceed = true
+                    };
                 }
 
                 logger.LogTrace("The original file of the movie with id : {id} deleted successfully", request.movieDto.Id);
@@ -73,7 +81,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     logger.LogError("An error occur when try to delete the compressed file of the movie with id : {id}", request.movieDto.Id);
 
-                    throw new InvalidUpdateOperationException($"Can not delete the compressed file that contains this segment {currentFileName}");
+                    return new ApiResponseDto<MovieDto>
+                    {
+                        Result = null!,
+                        Message = $"Can not delete the compressed file that contains this segment {currentFileName}",
+                        IsSucceed = true
+                    };
                 }
 
                 logger.LogTrace("The compressed file of the movie with id : {id} deleted successfully", request.movieDto.Id);
@@ -101,13 +114,23 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 logger.LogTrace("The movie with id {id} is updated successfully", request.movieDto.Id);
 
-                return new ApiResponseDto { Result = request.movieDto };
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = request.movieDto,
+                    Message = string.Empty,
+                    IsSucceed = true
+                };
             }
             catch (Exception ex)
             {
                 logger.LogTrace("The movie with id {id} is failed to update because this exception : {message}", request.movieDto.Id, ex.Message);
 
-                throw new InvalidUpdateOperationException($"can not update the movie content because this exception {ex.Message}");
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = null!,
+                    Message = $"can not update the movie content",
+                    IsSucceed = false
+                };
             }
         }
     }

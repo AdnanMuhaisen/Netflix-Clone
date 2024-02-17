@@ -17,14 +17,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
     public class DownloadMovieCommandHandler(ILogger<DownloadMovieCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
         IFileManager fileManager,
-        IOptions<ContentMovieOptions> options) : IRequestHandler<DownloadMovieCommand, ApiResponseDto>
+        IOptions<ContentMovieOptions> options) 
+        : IRequestHandler<DownloadMovieCommand, ApiResponseDto<DownloadMovieResponseDto>>
     {
         private readonly ILogger<DownloadMovieCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IFileManager fileManager = fileManager;
         private readonly IOptions<ContentMovieOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(DownloadMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<DownloadMovieResponseDto>> Handle(DownloadMovieCommand request, CancellationToken cancellationToken)
         {
             logger.LogTrace("The download movie command handler is started to execute");
 
@@ -37,10 +38,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 logger.LogError("Can not download the movie to a non existing location : {location}!", request.downloadMovieRequestDto.PathToDownloadFor);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DownloadMovieResponseDto>
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
-                    Message = $"Can not download the movie in this location : {request.downloadMovieRequestDto.PathToDownloadFor}"
+                    Message = $"Can not download the movie in this location " +
+                    $": {request.downloadMovieRequestDto.PathToDownloadFor}",
+                    IsSucceed = true
                 };
             }
 
@@ -54,14 +57,24 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 logger.LogError("The requested movie with id {id} does not exist !", request.downloadMovieRequestDto.PathToDownloadFor);
 
-                throw new EntityNotFoundException($"Can not find the target movie with id {request.downloadMovieRequestDto.MovieId}");
+                return new ApiResponseDto<DownloadMovieResponseDto>
+                {
+                    Result = new DownloadMovieResponseDto { IsDownloaded = false },
+                    Message = $"Can not find the target movie with id {request.downloadMovieRequestDto.MovieId}",
+                    IsSucceed = true
+                };
             }
 
             if (!targetMovie.IsAvailableToDownload)
             {
                 logger.LogError("Can not download move that is unavailable to download");
 
-                throw new ContentDownloadException("The movie is unavailable to download");
+                return new ApiResponseDto<DownloadMovieResponseDto>
+                {
+                    Result = new DownloadMovieResponseDto { IsDownloaded = false },
+                    Message = "The movie is unavailable to download",
+                    IsSucceed = true
+                };
             }
 
             //validate if the user verified to download based on user subscription plan
@@ -71,8 +84,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 .Where(x => x.UserId == request.userId && DateTime.UtcNow <= x.EndDate)
                 .Include(x => x.SubscriptionPlan)
                 .ThenInclude(x => x.PlanFeatures)
-                .FirstOrDefaultAsync()
-                ?? throw new ContentDownloadException($"A user with an ID {request.userId} does not have an active subscription !");
+                .FirstOrDefaultAsync();
+
+            if(activeUserSubscriptionPlan is null)
+            {
+                return new ApiResponseDto<DownloadMovieResponseDto>
+                {
+                    Result = new DownloadMovieResponseDto { IsDownloaded = false },
+                    Message = $"A user with an ID {request.userId} does not have an active subscription !",
+                    IsSucceed = true
+                };
+            }
 
             //check based on the plan and the previous user downloads if the 
             //user can download more movies
@@ -95,8 +117,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
             {
-                throw new ContentDownloadException($"The user can not download the movie because it is exceeds the times of " +
-                    $"downloads supported by the subscription !");
+                return new ApiResponseDto<DownloadMovieResponseDto>
+                {
+                    Result = new DownloadMovieResponseDto { IsDownloaded = false },
+                    Message = $"The user can not download the movie because it is exceeds the times of " +
+                    $"downloads supported by the subscription !",
+                    IsSucceed = true
+                };
             }
 
             logger.LogTrace("The target movie with id : {id} is retrieved", targetMovie.Id);
@@ -135,20 +162,22 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 logger.LogTrace("The movie updated successfully in the database");
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DownloadMovieResponseDto>
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = true },
-                    Message = string.Empty
+                    Message = string.Empty,
+                    IsSucceed = true
                 };
             }
             catch (Exception ex)
             {
                 logger.LogError("An error occurred while trying to download the movie with id {id}", targetMovie.Id);
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DownloadMovieResponseDto>
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
-                    Message = ex.Message
+                    Message = ex.Message,
+                    IsSucceed = false
                 };
             }
         }

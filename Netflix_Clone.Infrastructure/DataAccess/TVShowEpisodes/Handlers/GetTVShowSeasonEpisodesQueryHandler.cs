@@ -11,12 +11,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 {
     public class GetTVShowSeasonEpisodesQueryHandler(ILogger<GetTVShowSeasonEpisodesQueryHandler> logger,
         ApplicationDbContext applicationDbContext)
-                : IRequestHandler<GetTVShowSeasonEpisodesQuery, ApiResponseDto>
+                : IRequestHandler<GetTVShowSeasonEpisodesQuery, ApiResponseDto<IEnumerable<TVShowEpisodeDto>>>
     {
         private readonly ILogger<GetTVShowSeasonEpisodesQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<TVShowEpisodeDto>>> Handle(GetTVShowSeasonEpisodesQuery request, CancellationToken cancellationToken)
         {
             var episodes = await applicationDbContext
                 .TVShowEpisodes
@@ -27,13 +27,21 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (episodes is null)
             {
-                return new ApiResponseDto { Result = Enumerable.Empty<TVShowEpisodeDto>() };
+                return new ApiResponseDto<IEnumerable<TVShowEpisodeDto>> 
+                {
+                    Result = Enumerable.Empty<TVShowEpisodeDto>(),
+                    IsSucceed = true
+                };
             }
 
             foreach (var episode in episodes)
                 episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));
 
-            return new ApiResponseDto { Result = episodes.Adapt<List<TVShowEpisodeDto>>() };
+            return new ApiResponseDto<IEnumerable<TVShowEpisodeDto>>
+            {
+                Result = episodes.Adapt<List<TVShowEpisodeDto>>(),
+                IsSucceed = true
+            };
         }
     }
 }

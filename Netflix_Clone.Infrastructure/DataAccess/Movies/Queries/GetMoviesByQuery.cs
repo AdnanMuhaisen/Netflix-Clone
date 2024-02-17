@@ -8,7 +8,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Queries
         int? ReleaseYear = default,
         int? MinimumAgeToWatch = default,
         int? LanguageId = default,
-        int? DirectorId = default) : IRequest<ApiResponseDto>
+        int? DirectorId = default) : IRequest<ApiResponseDto<IEnumerable<MovieDto>>>
     {
         public readonly int? genreId = GenreId;
         public readonly int? releaseYear = ReleaseYear;

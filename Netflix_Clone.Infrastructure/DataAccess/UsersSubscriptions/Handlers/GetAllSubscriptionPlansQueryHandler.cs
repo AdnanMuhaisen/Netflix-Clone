@@ -9,12 +9,13 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 {
     public class GetAllSubscriptionPlansQueryHandler(ILogger<GetAllSubscriptionPlansQueryHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<GetAllSubscriptionPlansQuery, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) 
+        : IRequestHandler<GetAllSubscriptionPlansQuery, ApiResponseDto<IEnumerable<SubscriptionPlanDto>>>
     {
         private readonly ILogger<GetAllSubscriptionPlansQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetAllSubscriptionPlansQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<SubscriptionPlanDto>>> Handle(GetAllSubscriptionPlansQuery request, CancellationToken cancellationToken)
         {
             var subscriptionPlans = await applicationDbContext
                 .SubscriptionPlans
@@ -23,18 +24,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (subscriptionPlans is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<IEnumerable<SubscriptionPlanDto>>
                 {
                     Result = null!,
-                    Message = "There`s no subscription plans"
+                    Message = "There`s no subscription plans",
+                    IsSucceed = true
                 };
             }
 
             var result = subscriptionPlans.Adapt<List<SubscriptionPlanDto>>();
 
-            return new ApiResponseDto
+            return new ApiResponseDto<IEnumerable<SubscriptionPlanDto>>
             {
-                Result = result
+                Result = result,
+                IsSucceed = true
             };
         }
     }

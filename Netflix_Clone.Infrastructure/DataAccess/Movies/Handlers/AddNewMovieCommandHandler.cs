@@ -19,14 +19,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
         ApplicationDbContext applicationDbContext,
         IOptions<ContentMovieOptions> contentOptions,
         IFileManager fileManager) 
-        : IRequestHandler<AddNewMovieCommand, ApiResponseDto>
+        : IRequestHandler<AddNewMovieCommand, ApiResponseDto<MovieDto>>
     {
         private readonly ILogger<AddNewMovieCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentMovieOptions> contentOptions = contentOptions;
         private readonly IFileManager fileManager = fileManager;
 
-        public async Task<ApiResponseDto> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<MovieDto>> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
         {
             var IsMovieExists = await applicationDbContext
                   .Movies
@@ -35,7 +35,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(IsMovieExists)
             {
-                throw new InsertionException($"The movie with title {request.movieToInsertDto.Title} is already exist");
+                return new ApiResponseDto<MovieDto> 
+                { 
+                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    IsSucceed = true,
+                    Message = $"The movie with title {request.movieToInsertDto.Title} is already exist"
+                };
             }
 
             var movie = request.movieToInsertDto.Adapt<Movie>();
@@ -44,7 +49,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 logger.LogError($"The mapper package can not map the the {nameof(request.movieToInsertDto)} entity to {nameof(movie)}");
 
-                throw new InvalidMappingOperationException($"The mapper package can not map the the {nameof(request.movieToInsertDto)} entity to {nameof(movie)}");
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    IsSucceed = true,
+                    Message = $"The mapper package can not map the the {nameof(request.movieToInsertDto)} entity to {nameof(movie)}"
+                };
             }
 
             string movieFileNameToSave = $"{request.movieToInsertDto.Title}-{request.movieToInsertDto.ReleaseYear}-{Guid.NewGuid().ToString()[..4]}";
@@ -88,9 +98,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 logger.LogTrace($"The movie added to the database successfully");
 
-                var result = movie.Adapt<MovieDto>();
-
-                return new ApiResponseDto { Result = result };
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = movie.Adapt<MovieDto>(),
+                    IsSucceed = true,
+                    Message = string.Empty
+                };
             }
             catch (Exception ex)
             {
@@ -101,7 +114,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 logger.LogError($"An error occur while saving the movie due to : {ex.Message}");
 
-                throw new InsertionException(ex.Message);
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    IsSucceed = false,
+                    Message = "An error occur while saving the entity"
+                };
             }
         }
     }

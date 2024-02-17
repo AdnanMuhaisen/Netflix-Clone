@@ -15,13 +15,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 {
     public class AddNewTVShowSeasonCommandHandler(ILogger<AddNewTVShowSeasonCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<AddNewTVShowSeasonCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<AddNewTVShowSeasonCommand, ApiResponseDto<TVShowSeasonDto>>
     {
         private readonly ILogger<AddNewTVShowSeasonCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(AddNewTVShowSeasonCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<TVShowSeasonDto>> Handle(AddNewTVShowSeasonCommand request, CancellationToken cancellationToken)
         {
             var currentTVShowSeasons = await applicationDbContext
                 .TVShowsSeasons
@@ -32,8 +32,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             if(currentTVShowSeasons.Any(x=>x.SeasonNumber == request.tVShowSeasonToInsertDto.SeasonNumber 
                 || x.SeasonName == request.tVShowSeasonToInsertDto.SeasonName))
             {
-                throw new InsertionException($"Can not add the season number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
-                    $"with name : {request.tVShowSeasonToInsertDto.SeasonName} because it is already exist");
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    Message = $"Can not add the season number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
+                    $"with name : {request.tVShowSeasonToInsertDto.SeasonName} because it is already exist",
+                    IsSucceed = true
+                };
             }
 
             //the name of the TV SHow directory is the title of the tv show itself
@@ -48,8 +53,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if(!Directory.Exists(targetTVShowDirectoryName))
             {
-                throw new InvalidDirectoryCreationException($"The target TV Show with id : {request.tVShowSeasonToInsertDto.TVShowId}" +
-                    $" that you want to add season for does not exist");
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    Message = $"The target TV Show with id : {request.tVShowSeasonToInsertDto.TVShowId}" +
+                    $" that you want to add season for does not exist",
+                    IsSucceed = true
+                };
             }
 
             var lastSeasonNumberForTheTargetTVShow = Directory
@@ -58,8 +68,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if(request.tVShowSeasonToInsertDto.SeasonNumber != (lastSeasonNumberForTheTargetTVShow + 1))
             {
-                throw new InvalidDirectoryCreationException($"Can not add season with number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
-                    $"because the last season number is equals : {lastSeasonNumberForTheTargetTVShow}");
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    Message = $"Can not add season with number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
+                    $"because the last season number is equals : {lastSeasonNumberForTheTargetTVShow}",
+                    IsSucceed = true
+                };
             }
 
             //the format of the season folder is that : {TVShow Title}-{SeasonNumber}-{SeasonName(if exists)}            
@@ -79,7 +94,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             catch (Exception ex) 
             {
                 //log
-                throw new InvalidDirectoryCreationException(ex.Message);
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    Message = $"{ex.Message}",
+                    IsSucceed = false
+                };
             }
 
             //save to the database
@@ -103,10 +123,19 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             { 
                 Directory.Delete(pathOfTheDirectoryToAdd, true);
 
-                throw new InsertionException(ex.Message);
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    Message = $"Can not add season with number: {request.tVShowSeasonToInsertDto.SeasonNumber}",
+                    IsSucceed = false
+                };
             }
 
-            return new ApiResponseDto { Result = seasonToAdd.Adapt<TVShowSeasonDto>() };
+            return new ApiResponseDto<TVShowSeasonDto>
+            { 
+                Result = seasonToAdd.Adapt<TVShowSeasonDto>() ,
+                IsSucceed = true
+            };
         }
     }
 }

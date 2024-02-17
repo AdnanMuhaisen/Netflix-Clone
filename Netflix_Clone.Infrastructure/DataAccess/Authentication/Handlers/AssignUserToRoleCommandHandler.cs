@@ -7,38 +7,42 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
 {
     public class AssignUserToRoleCommandHandler(UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager) : IRequestHandler<AssignUserToRoleCommand, ApiResponseDto>
+        RoleManager<IdentityRole> roleManager) 
+        : IRequestHandler<AssignUserToRoleCommand, ApiResponseDto<AssignUserToRoleResponseDto>>
     {
         private readonly UserManager<ApplicationUser> userManager = userManager;
         private readonly RoleManager<IdentityRole> roleManager = roleManager;
 
-        public async Task<ApiResponseDto> Handle(AssignUserToRoleCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<AssignUserToRoleResponseDto>> Handle(AssignUserToRoleCommand request, CancellationToken cancellationToken)
         {
             var user = await userManager.FindByIdAsync(request.assignUserToRoleRequestDto.UserId);
             if (user is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
-                    Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} does not exist"
+                    Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} does not exist",
+                    IsSucceed = true
                 };
             }
 
             if (!await roleManager.RoleExistsAsync(request.assignUserToRoleRequestDto.RoleName))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
-                    Message = $"The role with name {request.assignUserToRoleRequestDto.RoleName} does not exist"
+                    Message = $"The role with name {request.assignUserToRoleRequestDto.RoleName} does not exist",
+                    IsSucceed = true
                 };
             }
 
             if (await userManager.IsInRoleAsync(user, request.assignUserToRoleRequestDto.RoleName))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
-                    Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} Is already in the role : {request.assignUserToRoleRequestDto.RoleName}"
+                    Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} Is already in the role : {request.assignUserToRoleRequestDto.RoleName}",
+                    IsSucceed = true
                 };
             }
 
@@ -46,16 +50,18 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
             var result = await userManager.AddToRoleAsync(user, request.assignUserToRoleRequestDto.RoleName);
 
             return result.Succeeded
-                ? new ApiResponseDto
+                ? new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = true },
-                    Message = string.Empty
+                    Message = string.Empty,
+                    IsSucceed = true
                 }
 
-                : new ApiResponseDto
+                : new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
-                    Message = string.Join(',', result.Errors.Select(x => x.Description))
+                    Message = string.Join(',', result.Errors.Select(x => x.Description)),
+                    IsSucceed= true
                 };
         }
     }

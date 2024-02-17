@@ -13,13 +13,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class GetAllTVShowsQueryHandler(ILogger<GetAllTVShowsQuery> logger
             , ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetAllTVShowsQuery, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetAllTVShowsQuery, ApiResponseDto<IEnumerable<TVShowDto>>>
     {
         private readonly ILogger<GetAllTVShowsQuery> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(GetAllTVShowsQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<TVShowDto>>> Handle(GetAllTVShowsQuery request, CancellationToken cancellationToken)
         {
             var tvShows = applicationDbContext
                 .TVShows
@@ -31,7 +31,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(tvShows is null)
             {
-                return new ApiResponseDto { Result = Enumerable.Empty<TVShowDto>() };
+                return new ApiResponseDto<IEnumerable<TVShowDto>> 
+                { 
+                    Result = Enumerable.Empty<TVShowDto>(),
+                    IsSucceed = true
+                };
             }
 
             var result = tvShows.Adapt<List<TVShowDto>>();
@@ -54,7 +58,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 }
             }
 
-            return new ApiResponseDto { Result = result };
+            return new ApiResponseDto<IEnumerable<TVShowDto>>
+            {
+                Result = result,
+                IsSucceed = true
+            };
         }
     }
 }

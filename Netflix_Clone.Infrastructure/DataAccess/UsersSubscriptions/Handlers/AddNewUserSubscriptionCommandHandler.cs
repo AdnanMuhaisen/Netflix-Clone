@@ -10,12 +10,13 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 {
     public class AddNewUserSubscriptionCommandHandler(ILogger<AddNewUserSubscriptionCommandHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<AddNewUserSubscriptionCommand, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) 
+        : IRequestHandler<AddNewUserSubscriptionCommand, ApiResponseDto<UserSubscriptionPlanDto>>
     {
         private readonly ILogger<AddNewUserSubscriptionCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(AddNewUserSubscriptionCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<UserSubscriptionPlanDto>> Handle(AddNewUserSubscriptionCommand request, CancellationToken cancellationToken)
         {
             bool IsSubscriptionPlanExists = await applicationDbContext
                 .SubscriptionPlans
@@ -24,10 +25,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (!IsSubscriptionPlanExists)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,
-                    Message = $"Can not find the subscription plan with id : {request.planId}"
+                    Message = $"Can not find the subscription plan with id : {request.planId}",
+                    IsSucceed = true
                 };
             }
 
@@ -39,10 +41,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (doesTheUserHaveActiveSubscription)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,
-                    Message = $"The user is already have an active subscription"
+                    Message = $"The user is already have an active subscription",
+                    IsSucceed = true
                 };
             }
 
@@ -61,18 +64,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
-                    Result = newUserSubscription.Adapt<UserSubscriptionPlanDto>()
+                    Result = newUserSubscription.Adapt<UserSubscriptionPlanDto>(),
+                    IsSucceed = true
                 };
             }
             catch (Exception ex)
             {
                 //log
-                return new ApiResponseDto
+                return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,
-                    Message = $"Can not add user subscription for the user with id : {request.userId}"
+                    Message = $"Can not add user subscription for the user with id : {request.userId}",
+                    IsSucceed = false
                 };
             }
         }

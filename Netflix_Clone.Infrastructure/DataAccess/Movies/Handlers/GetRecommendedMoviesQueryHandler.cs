@@ -11,12 +11,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 {
     public class GetRecommendedMoviesQueryHandler(ILogger<GetRecommendedMoviesQueryHandler> logger,
         ApplicationDbContext applicationDbContext)
-        : IRequestHandler<GetRecommendedMoviesQuery, ApiResponseDto>
+        : IRequestHandler<GetRecommendedMoviesQuery, ApiResponseDto<IEnumerable<MovieDto>>>
     {
         private readonly ILogger<GetRecommendedMoviesQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetRecommendedMoviesQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<MovieDto>>> Handle(GetRecommendedMoviesQuery request, CancellationToken cancellationToken)
         {
             var userHistory = await applicationDbContext
                 .UsersWatchHistories
@@ -52,10 +52,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 recommendedMovies ??= [];
 
-                return new ApiResponseDto
+                return new ApiResponseDto<IEnumerable<MovieDto>>
                 {
                     Result = recommendedMovies.Adapt<List<MovieDto>>(),
-                    Message = "There`s no movies to retrieve"
+                    Message = "There`s no movies to retrieve",
+                    IsSucceed = true
                 };
             }
 
@@ -79,9 +80,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             var result = recommendedMovies.Adapt<List<MovieDto>>();
 
-            return new ApiResponseDto
+            return new ApiResponseDto<IEnumerable<MovieDto>>
             {
-                Result = result
+                Result = result,
+                IsSucceed = true
             };
         }
     }

@@ -12,13 +12,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 {
     public class DeleteTVShowSeasonCommandHandler(ILogger<DeleteTVShowSeasonCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteTVShowSeasonCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteTVShowSeasonCommand, ApiResponseDto<DeletionResultDto>>
     {
         private readonly ILogger<DeleteTVShowSeasonCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(DeleteTVShowSeasonCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<DeletionResultDto>> Handle(DeleteTVShowSeasonCommand request, CancellationToken cancellationToken)
         {
             var targetSeasonToDelete = await applicationDbContext
                 .TVShowsSeasons
@@ -29,11 +29,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if(targetSeasonToDelete is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The target season with id: {request.deleteTVShowSeasonRequestDto.TVShowSeasonId}," +
-                    $" number: {request.deleteTVShowSeasonRequestDto.TVShowSeasonNumber} does not exist"
+                    $" number: {request.deleteTVShowSeasonRequestDto.TVShowSeasonNumber} does not exist",
+                    IsSucceed = true
                 };
             }
 
@@ -47,10 +48,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if (!Directory.Exists(pathOfTheSeasonDirectory))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
-                    Message = $"The season directory does not exists"
+                    Message = $"The season directory does not exists",
+                    IsSucceed = true
                 };
             }
 
@@ -61,10 +63,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             }
             catch (Exception ex) 
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
-                    Message = $"Can not delete the season directory because this error : {ex.Message}"
+                    Message = $"Can not delete the season directory because this error : {ex.Message}",
+                    IsSucceed = false
                 };
             }
 
@@ -88,18 +91,20 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
-                    Result = new DeletionResultDto { IsDeleted = true }
+                    Result = new DeletionResultDto { IsDeleted = true },
+                    IsSucceed = true
                 };
             }
             catch(Exception ex)
             {
                 //log the error
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
-                    Message = $"The season directory have been deleted but the records in the database does not deleted"
+                    Message = $"The season directory have been deleted but the records in the database does not deleted",
+                    IsSucceed = false
                 };
             }
         }

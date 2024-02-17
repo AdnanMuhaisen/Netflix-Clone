@@ -12,13 +12,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 {
     public class DeleteSeasonEpisodeCommandHandler(ILogger<DeleteSeasonEpisodeCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteSeasonEpisodeCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteSeasonEpisodeCommand,
+            ApiResponseDto<DeletionResultDto>>
     {
         private readonly ILogger<DeleteSeasonEpisodeCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(DeleteSeasonEpisodeCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<DeletionResultDto>> Handle(DeleteSeasonEpisodeCommand request, CancellationToken cancellationToken)
         {
             var targetEpisodeToDelete = await applicationDbContext
                 .TVShowEpisodes
@@ -29,13 +30,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(targetEpisodeToDelete is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
-                        IsDeleted = false,
+                        IsDeleted = false
                     },
-                    Message = $"Can not find the episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}"
+                    Message = $"Can not find the episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}",
+                    IsSucceed = true
                 };
             }
 
@@ -53,13 +55,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!Directory.Exists(pathOfTheEpisodeSeasonDirectory))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = "Can not find the TV Show Season Directory"
+                    Message = "Can not find the TV Show Season Directory",
+                    IsSucceed = true
                 };
             }
 
@@ -68,13 +71,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!File.Exists(pathOfTheTargetEpisodeFile))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = "Can not find the TV Show Season Episode File"
+                    Message = "Can not find the TV Show Season Episode File",
+                    IsSucceed = true
                 };
             }
 
@@ -85,13 +89,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             }
             catch(Exception ex)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = ex.Message
+                    Message = ex.Message,
+                    IsSucceed = false
                 };
             }
 
@@ -106,24 +111,26 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = true
-                    }
+                    },
+                    IsSucceed = true
                 };
             }
             catch(Exception ex)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
                     Message = $"The episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID} is deleted from the disk but does" +
-                    $" not deleted from the database because this exception : " + ex.Message
+                    $" not deleted from the database because this exception : " + ex.Message,
+                    IsSucceed = false
                 };
             }
         }

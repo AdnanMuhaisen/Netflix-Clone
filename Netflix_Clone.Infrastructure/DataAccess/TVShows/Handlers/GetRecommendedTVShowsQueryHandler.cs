@@ -10,12 +10,12 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class GetRecommendedTVShowsQueryHandler(ILogger<GetRecommendedTVShowsQueryHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<GetRecommendedTVShowsQuery, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) : IRequestHandler<GetRecommendedTVShowsQuery, ApiResponseDto<IEnumerable<TVShowDto>>>
     {
         private readonly ILogger<GetRecommendedTVShowsQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetRecommendedTVShowsQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<IEnumerable<TVShowDto>>> Handle(GetRecommendedTVShowsQuery request, CancellationToken cancellationToken)
         {
             var userHistory = await applicationDbContext
                 .UsersWatchHistories
@@ -52,10 +52,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
                 recommendedTvShows ??= new List<TVShow>();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<IEnumerable<TVShowDto>>
                 {
                     Result = recommendedTvShows.Adapt<List<TVShowDto>>(),
-                    Message = "There`s no TV Shows to retrieve"
+                    Message = "There`s no TV Shows to retrieve",
+                    IsSucceed = true
                 };
             }
 
@@ -79,9 +80,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             var result = recommendedTvShows.Adapt<List<TVShowDto>>();
 
-            return new ApiResponseDto
+            return new ApiResponseDto<IEnumerable<TVShowDto>>
             {
-                Result = result
+                Result = result,
+                IsSucceed = true
             };
         }
     }

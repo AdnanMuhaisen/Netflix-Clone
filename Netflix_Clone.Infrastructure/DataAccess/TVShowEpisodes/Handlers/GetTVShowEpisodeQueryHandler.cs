@@ -13,13 +13,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 {
     public class GetTVShowEpisodeQueryHandler(ILogger<GetTVShowEpisodeQueryHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetTVShowEpisodeQuery, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<GetTVShowEpisodeQuery, ApiResponseDto<TVShowEpisodeDto>>
     {
         private readonly ILogger<GetTVShowEpisodeQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(GetTVShowEpisodeQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<TVShowEpisodeDto>> Handle(GetTVShowEpisodeQuery request, CancellationToken cancellationToken)
         {
             var targetTVShow = await applicationDbContext
                 .TVShows
@@ -31,10 +31,11 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (targetTVShow is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    Message = "Can not find the target episode !"
+                    Message = "Can not find the target episode !",
+                    IsSucceed = true
                 };
             }
 
@@ -53,9 +54,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             var test = File.Exists(targetEpisode.FileName);
 
-            return new ApiResponseDto
+            return new ApiResponseDto<TVShowEpisodeDto>
             {
-                Result = targetEpisode.Adapt<TVShowEpisodeDto>()
+                Result = targetEpisode.Adapt<TVShowEpisodeDto>(),
+                IsSucceed = true
             };
         }
     }

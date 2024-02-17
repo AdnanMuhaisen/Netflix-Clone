@@ -10,12 +10,12 @@ using Netflix_Clone.Shared.DTOs;
 namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 {
     public class GetUserWatchListQueryHandler(ILogger<GetUserWatchListQueryHandler> logger,
-        ApplicationDbContext applicationDbContext) : IRequestHandler<GetUserWatchListQuery, ApiResponseDto>
+        ApplicationDbContext applicationDbContext) : IRequestHandler<GetUserWatchListQuery, ApiResponseDto<UserWatchListDto>>
     {
         private readonly ILogger<GetUserWatchListQueryHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
 
-        public async Task<ApiResponseDto> Handle(GetUserWatchListQuery request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<UserWatchListDto>> Handle(GetUserWatchListQuery request, CancellationToken cancellationToken)
         {
             var userWatchList = await applicationDbContext
                 .UsersWatchLists
@@ -37,24 +37,30 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
                     await applicationDbContext.SaveChangesAsync();
 
-                    return new ApiResponseDto
+                    return new ApiResponseDto<UserWatchListDto>
                     {
-                        Result = userWatchList.Adapt<UserWatchListDto>()
+                        Result = userWatchList.Adapt<UserWatchListDto>(),
+                        IsSucceed = true
                     };
                 }
                 catch (Exception ex)
                 {
-                    return new ApiResponseDto
+                    return new ApiResponseDto<UserWatchListDto>
                     {
                         Result = null!,
-                        Message = $"Can not create a watch list for the user with id {request.userId}"
+                        Message = $"Can not create a watch list for the user with id {request.userId}",
+                        IsSucceed = false
                     };
                 }
             }
 
             var result = userWatchList.Adapt<UserWatchListDto>();
 
-            return new ApiResponseDto { Result = result };
+            return new ApiResponseDto<UserWatchListDto>
+            {
+                Result = result,
+                IsSucceed = true
+            };
         }
     }
 }

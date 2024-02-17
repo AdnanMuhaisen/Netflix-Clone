@@ -12,13 +12,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 {
     public class DeleteTVShowCommandHandler(ILogger<DeleteTVShowCommandHandler> logger,
         ApplicationDbContext applicationDbContext,
-        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteTVShowCommand, ApiResponseDto>
+        IOptions<ContentTVShowOptions> options) : IRequestHandler<DeleteTVShowCommand, ApiResponseDto<DeletionResultDto>>
     {
         private readonly ILogger<DeleteTVShowCommandHandler> logger = logger;
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly IOptions<ContentTVShowOptions> options = options;
 
-        public async Task<ApiResponseDto> Handle(DeleteTVShowCommand request, CancellationToken cancellationToken)
+        public async Task<ApiResponseDto<DeletionResultDto>> Handle(DeleteTVShowCommand request, CancellationToken cancellationToken)
         {
             var targetTVShowToDelete = await applicationDbContext
                 .TVShows
@@ -27,13 +27,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(targetTVShowToDelete is null)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = $"The target TV Show to delete with id {request.tVShowId} does not exist"
+                    Message = $"The target TV Show to delete with id {request.tVShowId} does not exist",
+                    IsSucceed = true
                 };
             }
 
@@ -44,13 +45,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(!Directory.Exists(pathOfTheTargetTVShow))
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = $"Can not find the target TV Show directory"
+                    Message = $"Can not find the target TV Show directory",
+                    IsSucceed = true
                 };
             }
 
@@ -61,13 +63,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             }
             catch(Exception ex)
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = $"Can not delete the target TV Show directory"
+                    Message = $"Can not delete the target TV Show directory",
+                    IsSucceed = false
                 };
             }
 
@@ -83,24 +86,26 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = true,
-                    }
+                    },
+                    IsSucceed = true
                 };
             }
             catch(Exception ex)
             {
                 //log
-                return new ApiResponseDto
+                return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
                     {
                         IsDeleted = false,
                     },
-                    Message = "The TV Show is deleted from the disk but can not delete it from the database"
+                    Message = "The TV Show is deleted from the disk but can not delete it from the database",
+                    IsSucceed = false
                 };
             }
         }

@@ -3,7 +3,8 @@ using Netflix_Clone.Shared.DTOs;
 
 namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Commands
 {
-    public class AddNewUserSubscriptionCommand(string UserId, int PlanId) : IRequest<ApiResponseDto>
+    public class AddNewUserSubscriptionCommand(string UserId, int PlanId)
+        : IRequest<ApiResponseDto<UserSubscriptionPlanDto>>
     {
         public readonly string userId = UserId;
         public readonly int planId = PlanId;
