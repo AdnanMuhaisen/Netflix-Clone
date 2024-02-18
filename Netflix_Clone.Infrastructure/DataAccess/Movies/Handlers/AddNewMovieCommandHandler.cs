@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Netflix_Clone.Application.Services.Checkers;
 using Netflix_Clone.Application.Services.IServices;
 using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.Entities;
@@ -28,6 +29,30 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
         public async Task<ApiResponseDto<MovieDto>> Handle(AddNewMovieCommand request, CancellationToken cancellationToken)
         {
+            if (!File.Exists(request.movieToInsertDto.Location))
+            {
+                logger.LogError($"The file location {request.movieToInsertDto.Location} does not exists");
+
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"The movie with file {request.movieToInsertDto.Location} does not exist"
+                };
+            }
+
+            if (!MediaFileExtensionChecker.IsValidFileExtension(Path.GetExtension(request.movieToInsertDto.Location)))
+            {
+                logger.LogError($"The file extension {Path.GetExtension(request.movieToInsertDto.Location)} is not valid");
+
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = null!,
+                    IsSucceed = true,
+                    Message = $"Invalid file extension {Path.GetExtension(request.movieToInsertDto.Location)}"
+                };
+            }
+
             var IsMovieExists = await applicationDbContext
                   .Movies
                   .AsNoTracking()
@@ -37,7 +62,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             {
                 return new ApiResponseDto<MovieDto> 
                 { 
-                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    Result = null!,
                     IsSucceed = true,
                     Message = $"The movie with title {request.movieToInsertDto.Title} is already exist"
                 };
@@ -51,7 +76,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 return new ApiResponseDto<MovieDto>
                 {
-                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    Result = null!,
                     IsSucceed = true,
                     Message = $"The mapper package can not map the the {nameof(request.movieToInsertDto)} entity to {nameof(movie)}"
                 };
@@ -116,7 +141,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
                 return new ApiResponseDto<MovieDto>
                 {
-                    Result = request.movieToInsertDto.Adapt<MovieDto>(),
+                    Result = null!,
                     IsSucceed = false,
                     Message = "An error occur while saving the entity"
                 };

@@ -11,7 +11,7 @@ namespace Netflix_Clone.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME)]
+    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class SubscriptionPlanController : BaseController<SubscriptionPlanController>
     {
         private readonly IMediator mediator;
@@ -25,27 +25,45 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<ApiResponseDto>> GetSubscriptionPlans()
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<SubscriptionPlanDto>>>> GetSubscriptionPlans()
         {
-            var query = new GetAllSubscriptionPlansQuery();
-            var response = await mediator.Send(query);
+            var response = await mediator.Send(new GetAllSubscriptionPlansQuery());
 
-            return (response.Result is null) ? NotFound() : Ok(response);
+            if (response.IsSucceed)
+            {
+                return (response.Result is not null)
+                    ? Ok(response)
+                    : NotFound();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
 
         [HttpPost]
         [Route("POST/NewUserSubscription/{PlanId:int}")]
-        public async Task<ActionResult<ApiResponseDto>> AddNewUserSubscription(int PlanId)
+        public async Task<ActionResult<ApiResponseDto<UserSubscriptionPlanDto>>> AddNewUserSubscription(int PlanId)
         {
-            if(User.Identity is null || !User.Identity.IsAuthenticated)
+            if (User.Identity is null || !User.Identity.IsAuthenticated)
             {
                 return Unauthorized();
             }
 
-            var command = new AddNewUserSubscriptionCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value, PlanId);
-            var result = await mediator.Send(command);
-            return (result.Result is null) ? BadRequest(result) : Created("", result);
+            var response = await mediator.Send(new AddNewUserSubscriptionCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+                PlanId));
+
+            if (response.IsSucceed)
+            {
+                return (response.Result is not null)
+                    ? Created("", response)
+                    : BadRequest(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
     }
 }

@@ -15,6 +15,19 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
 
         public async Task<ApiResponseDto<AddNewRoleResponseDto>> Handle(AddNewRoleCommand request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(request.roleName))
+            {
+                return new ApiResponseDto<AddNewRoleResponseDto>
+                {
+                    Result = new AddNewRoleResponseDto
+                    {
+                        IsAdded = false
+                    },
+                    Message = $"Invalid Role Name: {request.roleName}",
+                    IsSucceed = true
+                };
+            }
+
             if (await roleManager.RoleExistsAsync(request.roleName))
             {
                 return new ApiResponseDto<AddNewRoleResponseDto>

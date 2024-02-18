@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Commands;
@@ -9,7 +10,7 @@ namespace Netflix_Clone.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME)]
+    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowSeasonsController : BaseController<TVShowSeasonsController>
     {
         private readonly IMediator mediator;
@@ -23,29 +24,40 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("GET/{TVShowContentId:int}")]
-        public async Task<ActionResult<ApiResponseDto>> GetTVShowSeasons(int TVShowContentId)
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowSeasonDto>>>> GetTVShowSeasons(int TVShowContentId)
         {
-            var query = new GetTVShowSeasonsQuery(TVShowContentId);
-            var response = await mediator.Send(query);
-            return (response is null) ? BadRequest(response) : Ok(response);
+            var response = await mediator.Send(new GetTVShowSeasonsQuery(TVShowContentId));
+
+            if (response.IsSucceed)
+            {
+                return (response.Result is not null)
+                    ? Ok(response)
+                    : NotFound();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpPost]
         [Route("POST/AddNewSeasonForTVShow")]
-        [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> AddNewSeasonForTVShow([FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<TVShowSeasonDto>>> AddNewSeasonForTVShow([FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
         {
             if (ModelState.IsValid)
             {
-                try
+                var response = await mediator.Send(tVShowSeasonToInsertDto.Adapt<AddNewTVShowSeasonCommand>());
+
+                if (response.IsSucceed)
                 {
-                    var command = new AddNewTVShowSeasonCommand(tVShowSeasonToInsertDto);
-                    var response = await mediator.Send(command);
-                    return Created("", response);
+                    return (response.Result is not null)
+                        ? Created("", response)
+                        : BadRequest(response);
                 }
-                catch(Exception ex)
+                else
                 {
-                    return BadRequest(ex.Message);
+                    return BadRequest(response);
                 }
             }
             else
@@ -58,13 +70,23 @@ namespace Netflix_Clone.API.Controllers
         [HttpDelete]
         [Route("DELETE/TVShowSeason")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> DeleteTVShowSeason([FromBody] DeleteTVShowSeasonRequestDto deleteTVShowSeasonRequestDto)
+        public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteTVShowSeason(
+            [FromBody] DeleteTVShowSeasonRequestDto deleteTVShowSeasonRequestDto)
         {
             if (ModelState.IsValid)
             {
-                var command = new DeleteTVShowSeasonCommand(deleteTVShowSeasonRequestDto);
-                var response = await mediator.Send(command);
-                return (((DeletionResultDto)response.Result).IsDeleted) ? NoContent() : BadRequest(response);   
+                var response = await mediator.Send(deleteTVShowSeasonRequestDto.Adapt<DeleteTVShowSeasonCommand>());
+
+                if (response.IsSucceed)
+                {
+                    return (response.Result.IsDeleted)
+                        ? NoContent()
+                        : BadRequest(response);
+                }
+                else
+                {
+                    return BadRequest(response);
+                }
             }
             else
             {

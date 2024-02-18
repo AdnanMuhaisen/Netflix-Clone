@@ -11,7 +11,6 @@ namespace Netflix_Clone.API.Extensions.Application
         public static void RegisterApplicationServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.RegisterDomainServices();
             builder.Services.AddScoped<IFileCompressor, FileCompressor>();
             builder.Services.AddScoped<IFileManager, FileManager>();
             builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();

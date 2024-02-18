@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using Mapster;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Netflix_Clone.Domain.Entities;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Queries;
 using Netflix_Clone.Shared.DTOs;
@@ -10,7 +12,7 @@ namespace Netflix_Clone.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes =BEARER_AUTHENTICATION_SCHEME)]
+    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowsController : BaseController<TVShowsController>
     {
         private readonly IMediator mediator;
@@ -24,92 +26,135 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("GET")]
-        public async Task<ActionResult<ApiResponseDto>> GetAllTVShows()
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetAllTVShows()
         {
-            var query = new GetAllTVShowsQuery();
-            var response = await mediator.Send(query);
-            return (response is null) ? BadRequest() : Ok(response);
+            var response = await mediator.Send(new GetAllTVShowsQuery());
+
+            if(response.IsSucceed)
+            {
+                return (response.Result is not null)
+                    ? Ok(response)
+                    : BadRequest();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpPost]
         [Route("POST/AddNewTVShow")]
-        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> AddNewTVShow([FromBody] TVShowToInsertDto tVShowToInsertDto)
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<TVShowDto>>> AddNewTVShow([FromBody] TVShowToInsertDto tVShowToInsertDto)
         {
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
-                try
+                var response = await mediator.Send(tVShowToInsertDto.Adapt<AddNewTVShowCommand>());
+
+                if (response.IsSucceed)
                 {
-                    var command = new AddNewTVShowCommand(tVShowToInsertDto);
-                    var result = await mediator.Send(command);
-                    return Created("", result);
+                    return (response.Result is not null)
+                        ? Created("", response)
+                        : BadRequest(response);
                 }
-                catch (Exception ex) 
+                else
                 {
-                    return BadRequest(ex.Message);
+                    return BadRequest(response);
                 }
             }
             else
             {
-                return BadRequest(new { tVShowToInsertDto, Message = "Invalid Model State" });
+                return BadRequest(new ApiResponseDto<TVShowDto> 
+                { 
+                    Result = null!,
+                    Message = "Invalid Model State",
+                    IsSucceed = true
+                });
             }
         }
 
         [HttpDelete]
         [Route("DELETE/{TVShowId:int}")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> DeleteTVShow([FromRoute] int TVShowId)
+        public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteTVShow([FromRoute] int TVShowId)
         {
             // there`s a cascade delete between the tbl_TVShows table and the tbl_TVShowSeasons table 
             // but to avoid the cycles or multiple cascade paths problem : i have created a trigger 
             // to delete the season episodes when the season is deleted.
 
-            var command = new DeleteTVShowCommand(TVShowId);
-            var response = await mediator.Send(command);
-            return (((DeletionResultDto)response.Result).IsDeleted)
-                ? NoContent()
-                : BadRequest(response);
+            var response = await mediator.Send(new DeleteTVShowCommand(TVShowId));
+
+            if (response.IsSucceed)
+            {
+                return (response.Result.IsDeleted)
+                    ? NoContent()
+                    : BadRequest(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpGet]
         [Route("GET/{TVShowId:int}")]
-        public async Task<ActionResult<ApiResponseDto>> GetTVShow(int TVShowId)
+        public async Task<ActionResult<ApiResponseDto<TVShowDto>>> GetTVShow(int TVShowId)
         {
-            var query = new GetTVShowQuery(TVShowId);
-            var response = await mediator.Send(query);
-            return (response.Result is null)
-                ? NotFound(response)
-                : Ok(response);
+            var response = await mediator.Send(new GetTVShowQuery(TVShowId));
+            if (response.IsSucceed)
+            {
+                return (response.Result is null)
+                    ? NotFound(response)
+                    : Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
-
-        // get recommended TVShows
-        // get TVShow based on filters 
 
         [HttpGet]
         [Route("GET/RecommendedTVShows")]
-        public async Task<ActionResult<ApiResponseDto>> GetRecommendedTVShows([FromQuery] int TotalNumberOfItemsRetrieved = 10)
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetRecommendedTVShows([FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
-            var query = new GetRecommendedTVShowsQuery(
-                User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+            var query = new GetRecommendedTVShowsQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
 
             var response = await mediator.Send(query);
 
-            return Ok(response);
+            if(response.IsSucceed)
+            {
+                return (response.Result is null)
+                    ? NotFound()
+                    : Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpGet]
         [Route("GET/TVShowBy")]
-        public async Task<ActionResult<ApiResponseDto>> GetTVShowsBy(
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetTVShowsBy(
             [FromQuery] int? GenreId = default,
             [FromQuery] int? ReleaseYear = default,
             [FromQuery] int? MinimumAgeToWatch = default,
             [FromQuery] int? LanguageId = default,
             [FromQuery] int? DirectorId = default)
         {
-            var query = new GetTVShowsByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId);
-            var response = await mediator.Send(query);
-            return Ok(response);
+            var response = await mediator.Send(new GetTVShowsByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId));
+
+            if (response.IsSucceed)
+            {
+                return (response.Result is not null)
+                    ? Ok(response)
+                    : NotFound();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
     }
 }

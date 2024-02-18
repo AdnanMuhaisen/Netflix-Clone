@@ -7,8 +7,8 @@ using Netflix_Clone.API.Extensions.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.RegisterAPIServices();
 builder.RegisterDomainServices();
+builder.RegisterAPIServices();
 builder.RegisterInfrastructureServices();
 builder.RegisterApplicationServices();
 

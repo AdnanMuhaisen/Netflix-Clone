@@ -1,4 +1,5 @@
 ﻿
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace Netflix_Clone.API.Controllers
     [Route("api/[controller]")]
     public class AuthenticationController : BaseController<AuthenticationController>
     {
-        private readonly IMediator mediator;
+        private readonly ISender mediator;
         private readonly IOptions<UserRolesOptions> userRolesOptions;
 
         public AuthenticationController(ILogger<AuthenticationController> logger,
@@ -28,36 +29,42 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST/Register")]
-        public async Task<ActionResult<RegistrationResponseDto>> Register([FromBody]RegistrationRequestDto registrationRequestDto)
+        public async Task<ActionResult<ApiResponseDto<RegistrationResponseDto>>> Register([FromBody]RegistrationRequestDto registrationRequestDto)
         {
             if (ModelState.IsValid)
             {
-                var command = new RegisterUserCommand(registrationRequestDto);
-                var result = await mediator.Send(command);
-                return (result is null) ? BadRequest(result) : Created("", result);
+                var response = await mediator.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
+                return (response.IsSucceed) ? Ok(response) : BadRequest(response);
             }
             else
             {
-                return null!;// BadRequest(new RegistrationResponseDto { IsRegistered = false, Message = "Invalid Model State" });
+                return BadRequest(new ApiResponseDto<RegistrationResponseDto>
+                {
+                    Result = new RegistrationResponseDto { IsRegistered = false },
+                    Message = "Invalid Model State",
+                    IsSucceed = false
+                });
             }
         }
 
         [HttpPost]
         [Route("POST/AddNewUserRole/{RoleName}")]
-        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> AddNewUserRole([FromRoute] string RoleName)
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<AddNewRoleResponseDto>>> AddNewUserRole([FromRoute] string RoleName)
         {
-            if (string.IsNullOrWhiteSpace(RoleName))
-            {
-                return BadRequest(false);
-            }
-
             var command = new AddNewRoleCommand(RoleName);
             var response = await mediator.Send(command);
 
-            return (((AddNewRoleResponseDto)(response.Result)).IsAdded)
-                ? Created("", response)
-                : BadRequest(response);
+            if (response.IsSucceed)
+            {
+                return response.Result.IsAdded
+                    ? Created("", response.Result)
+                    : BadRequest(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
         [HttpPost]
@@ -66,9 +73,10 @@ namespace Netflix_Clone.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var command = new UserLoginCommand(loginRequestDto, HttpContext);
-                var result = await mediator.Send(command);
-                return null!;//(result.UserDto is null) ? BadRequest(result) : Ok(result);
+                var response = await mediator.Send(new UserLoginCommand(loginRequestDto, HttpContext));
+                return (response.IsSucceed)
+                ? Ok(response)
+                : BadRequest(response);
             }
             else
             {
@@ -81,23 +89,31 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST/AssignRoleToUser")]
-        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> AssignUserToRole([FromBody] AssignUserToRoleRequestDto assignUserToRoleRequestDto)
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<AssignUserToRoleResponseDto>>> AssignUserToRole([FromBody] AssignUserToRoleRequestDto assignUserToRoleRequestDto)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var command = new AssignUserToRoleCommand(assignUserToRoleRequestDto);
-                var response = await mediator.Send(command);
-                return (((AssignUserToRoleResponseDto)(response.Result)).IsAssigned)
+                var response = await mediator.Send(assignUserToRoleRequestDto.Adapt<AssignUserToRoleCommand>());
+
+                if (response.IsSucceed)
+                {
+                    return (response.Result.IsAssigned)
                     ? Ok(response)
                     : BadRequest(response);
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             else
             {
-                return new ApiResponseDto
+                return new ApiResponseDto<AssignUserToRoleResponseDto>
                 {
                     Result = null!,
-                    Message = "Invalid Model State"
+                    Message = "Invalid Model State",
+                    IsSucceed = true
                 };
             }
         }

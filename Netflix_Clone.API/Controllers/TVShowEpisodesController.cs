@@ -1,4 +1,5 @@
 ﻿
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,16 +28,25 @@ namespace Netflix_Clone.API.Controllers
         //test this end point
         [HttpGet]
         [Route("GET/GetTVShowSeasonEpisodes")]
-        public async Task<ActionResult<ApiResponseDto>> GetAllTVShowSeasonEpisodes(
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowEpisodeDto>>>> GetAllTVShowSeasonEpisodes(
             [FromQuery] TVShowSeasonEpisodesRequestDto tVShowSeasonEpisodesRequestDto)
         {
             if (ModelState.IsValid)
             {
-                var query = new GetTVShowSeasonEpisodesQuery(tVShowSeasonEpisodesRequestDto);
-                var response = await mediator.Send(query);
-                return (response is null) ? BadRequest() : Ok(response);
+                var response = await mediator.Send(tVShowSeasonEpisodesRequestDto.Adapt<GetTVShowSeasonEpisodesQuery>());
+
+                if (response.IsSucceed)
+                {
+                    return (response.Result is not null)
+                        ? Ok(response)
+                        : NotFound();
+                }
+                else
+                {
+                    return BadRequest(response);
+                }
             }
-            else 
+            else
             {
                 return BadRequest("Invalid Model State");
             }
@@ -44,21 +54,23 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST/AddTVShowEpisode")]
-        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles =ADMIN_ROLE)]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
 
-        public async Task<ActionResult<ApiResponseDto>> AddNewSeasonEpisode([FromBody] TVShowEpisodeToInsertDto tVShowEpisodeToInsert)
+        public async Task<ActionResult<ApiResponseDto<TVShowEpisodeDto>>> AddNewSeasonEpisode([FromBody] TVShowEpisodeToInsertDto tVShowEpisodeToInsert)
         {
             if (ModelState.IsValid)
             {
-                var command = new AddNewTVShowEpisodeCommand(tVShowEpisodeToInsert);
-                try
+                var response = await mediator.Send(tVShowEpisodeToInsert.Adapt<AddNewTVShowEpisodeCommand>());
+
+                if (response.IsSucceed)
                 {
-                    var result = await mediator.Send(command);
-                    return Created("", result);
+                    return (response.Result is null)
+                        ? Created("", response)
+                        : BadRequest(response);
                 }
-                catch(Exception ex)
+                else
                 {
-                    return BadRequest(ex.Message);
+                    return BadRequest(response);
                 }
             }
             else
@@ -71,13 +83,23 @@ namespace Netflix_Clone.API.Controllers
         [HttpDelete]
         [Route("DELETE/DeleteEpisode")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto>> DeleteSeasonEpisode([FromBody] TVShowSeasonEpisodeToDeleteDto tVShowSeasonEpisodeToDeleteDto)
+        public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteSeasonEpisode(
+            [FromBody] TVShowSeasonEpisodeToDeleteDto tVShowSeasonEpisodeToDeleteDto)
         {
             if (ModelState.IsValid)
             {
-                var command = new DeleteSeasonEpisodeCommand(tVShowSeasonEpisodeToDeleteDto);
-                var response = await mediator.Send(command);
-                return (((DeletionResultDto)response.Result).IsDeleted) ? NoContent() : BadRequest(response);
+                var response = await mediator.Send(tVShowSeasonEpisodeToDeleteDto.Adapt<DeleteSeasonEpisodeCommand>());
+
+                if (response.IsSucceed)
+                {
+                    return (response.Result.IsDeleted)
+                        ? NoContent()
+                        : BadRequest(response);
+                }
+                else
+                {
+                    return BadRequest(response);
+                }
             }
             else
             {
@@ -87,31 +109,35 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpGet]
         [Route("GET")]
-        public async Task<ActionResult<ApiResponseDto>> GetTVShowEpisode(
+        public async Task<ActionResult<ApiResponseDto<TVShowEpisodeDto>>> GetTVShowEpisode(
             [FromQuery] TVShowEpisodeRequestDto tVShowEpisodeRequestDto)
         {
             if (ModelState.IsValid)
             {
-                var query = new GetTVShowEpisodeQuery(tVShowEpisodeRequestDto);
-                var getEpisodeResponse = await mediator.Send(query);
+                var response = await mediator.Send(tVShowEpisodeRequestDto.Adapt<GetTVShowEpisodeQuery>());
 
-                if (getEpisodeResponse.Result is not null
-                    && User.Identity is not null
-                    && User.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == USER_ROLE))
+                if (response.IsSucceed)
                 {
-                    // add to user watch history
-                    var command = new AddToUserWatchHistoryCommand(new AddToUserWatchHistoryRequestDto
+                    if (response.Result is not null&& User.Identity is not null&& User.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == USER_ROLE))
                     {
-                        ContentId = tVShowEpisodeRequestDto.TVShowId,
-                        ApplicationUserId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value
-                    });
+                        // add to user watch history
+                        var command = new AddToUserWatchHistoryCommand(new AddToUserWatchHistoryRequestDto
+                        {
+                            ContentId = tVShowEpisodeRequestDto.TVShowId,
+                            ApplicationUserId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value
+                        });
 
-                    await mediator.Send(command);
+                        await mediator.Send(command);
+                    }
+                }
+                else
+                {
+                    return BadRequest(response);
                 }
 
-                return (getEpisodeResponse.Result is null)
-                    ? NotFound()
-                    : Ok(getEpisodeResponse);
+                return (response.Result is not null)
+                    ? Ok(response)
+                    : NotFound();
             }
             else
             {
@@ -121,30 +147,29 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST/DownloadTVShowEpisode")]
-        public async Task<ActionResult<ApiResponseDto>> DownloadTVShowEpisode(
+        public async Task<ActionResult<ApiResponseDto<string>>> DownloadTVShowEpisode(
             [FromBody] DownloadEpisodeRequestDto downloadEpisodeRequestDto)
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto,
-                        User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+                var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto,User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
-                    var response = await mediator.Send(command);
-                    return (response.Result is null)
-                        ? BadRequest(response)
-                        : Ok(response);
-                }
-                catch (Exception ex)
+                var response = await mediator.Send(command);
+                if (response.IsSucceed)
                 {
-                    return BadRequest(ex.Message);
+                    return (response.Result is not null)
+                        ? Ok(response)
+                        : BadRequest(response);
                 }
+                else
+                {
+                    return BadRequest(response);
+                }                
             }
             else
             {
                 return BadRequest("Invalid Model State");
             }
-        }         
+        }
     }
 }
