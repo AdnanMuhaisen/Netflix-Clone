@@ -43,7 +43,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
                     Message = $"Can not download the movie in this location " +
                     $": {request.downloadMovieRequestDto.PathToDownloadFor}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -61,7 +61,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
                     Message = $"Can not find the target movie with id {request.downloadMovieRequestDto.MovieId}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -73,7 +73,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
                     Message = "The movie is unavailable to download",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -92,7 +92,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
                     Message = $"A user with an ID {request.userId} does not have an active subscription !",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -122,7 +122,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
                     Message = $"The user can not download the movie because it is exceeds the times of " +
                     $"downloads supported by the subscription !",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

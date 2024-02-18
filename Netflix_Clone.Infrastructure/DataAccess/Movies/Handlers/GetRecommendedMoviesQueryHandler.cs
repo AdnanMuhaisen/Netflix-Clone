@@ -56,7 +56,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     Result = recommendedMovies.Adapt<List<MovieDto>>(),
                     Message = "There`s no movies to retrieve",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

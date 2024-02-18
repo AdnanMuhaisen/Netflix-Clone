@@ -23,16 +23,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 .AsNoTracking()
                 .Where(x => x.TVShowId == request.tVShowSeasonEpisodesRequestDto.TVShowId
                 && x.SeasonId == request.tVShowSeasonEpisodesRequestDto.TVShowSeasonId)
-                .ToListAsync();
-
-            if (episodes is null)
-            {
-                return new ApiResponseDto<IEnumerable<TVShowEpisodeDto>> 
-                {
-                    Result = Enumerable.Empty<TVShowEpisodeDto>(),
-                    IsSucceed = true
-                };
-            }
+                .ToListAsync() ?? [];
 
             foreach (var episode in episodes)
                 episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));

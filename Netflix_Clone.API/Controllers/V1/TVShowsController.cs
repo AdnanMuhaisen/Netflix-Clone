@@ -3,7 +3,6 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Netflix_Clone.Domain.Entities;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Queries;
 using Netflix_Clone.Shared.DTOs;
@@ -15,28 +14,23 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class TVShowsController : BaseController<TVShowsController>
+    public class TVShowsController(
+        ILogger<TVShowsController> logger,
+        ISender sender)
+        
+        : BaseController<TVShowsController>(logger)
     {
-        private readonly IMediator mediator;
-
-        public TVShowsController(ILogger<TVShowsController> logger,
-            IMediator mediator)
-            : base(logger)
-        {
-            this.mediator = mediator;
-        }
+        private readonly ISender sender = sender;
 
         [HttpGet]
         [Route("GET")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetAllTVShows()
         {
-            var response = await mediator.Send(new GetAllTVShowsQuery());
+            var response = await sender.Send(new GetAllTVShowsQuery());
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : BadRequest();
+                return Ok(response);
             }
             else
             {
@@ -51,13 +45,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowToInsertDto.Adapt<AddNewTVShowCommand>());
+                var response = await sender.Send(tVShowToInsertDto.Adapt<AddNewTVShowCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Created("", response)
-                        : BadRequest(response);
+                    return Created("", response);
                 }
                 else
                 {
@@ -84,13 +76,11 @@ namespace Netflix_Clone.API.Controllers.V1
             // but to avoid the cycles or multiple cascade paths problem : i have created a trigger 
             // to delete the season episodes when the season is deleted.
 
-            var response = await mediator.Send(new DeleteTVShowCommand(TVShowId));
+            var response = await sender.Send(new DeleteTVShowCommand(TVShowId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result.IsDeleted)
             {
-                return response.Result.IsDeleted
-                    ? NoContent()
-                    : BadRequest(response);
+                return NoContent();
             }
             else
             {
@@ -102,12 +92,10 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("GET/{TVShowId:int}")]
         public async Task<ActionResult<ApiResponseDto<TVShowDto>>> GetTVShow(int TVShowId)
         {
-            var response = await mediator.Send(new GetTVShowQuery(TVShowId));
-            if (response.IsSucceed)
+            var response = await sender.Send(new GetTVShowQuery(TVShowId));
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is null
-                    ? NotFound(response)
-                    : Ok(response);
+                return Ok(response);
             }
             else
             {
@@ -122,13 +110,11 @@ namespace Netflix_Clone.API.Controllers.V1
             var query = new GetRecommendedTVShowsQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
 
-            var response = await mediator.Send(query);
+            var response = await sender.Send(query);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is null
-                    ? NotFound()
-                    : Ok(response);
+                return Ok(response);
             }
             else
             {
@@ -145,13 +131,11 @@ namespace Netflix_Clone.API.Controllers.V1
             [FromQuery] int? LanguageId = default,
             [FromQuery] int? DirectorId = default)
         {
-            var response = await mediator.Send(new GetTVShowsByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId));
+            var response = await sender.Send(new GetTVShowsByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound();
+                return Ok(response);
             }
             else
             {

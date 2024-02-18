@@ -28,7 +28,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 {
                     Result = false,
                     Message = "Can not find the required content",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -77,7 +77,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 {
                     Result = true,
                     Message = $"The content with id : {request.contentId} is already in the watchlist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

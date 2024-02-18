@@ -29,7 +29,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
                 {
                     Result = null!,
                     Message = $"Can not find the subscription plan with id : {request.planId}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -45,7 +45,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
                 {
                     Result = null!,
                     Message = $"The user is already have an active subscription",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

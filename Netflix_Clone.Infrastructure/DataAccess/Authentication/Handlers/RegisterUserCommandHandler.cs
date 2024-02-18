@@ -33,7 +33,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                         IsRegistered = false,
                     },
                     Message = $"The user with the email : {request.registrationRequestDto.Email} is already exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -50,7 +50,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                         IsRegistered = false,
                     },
                     Message = $"The user with the UserName : {request.registrationRequestDto.FirstName}{request.registrationRequestDto.FirstName} is already exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -78,7 +78,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                         IsRegistered = false,
                     },
                     Message = string.Join(',', userCreationResult.Errors.Select(x => x.Description)),
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -97,7 +97,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                         IsRegistered = true,
                     },
                     Message = "Can not find the user after it is added successfully",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -115,7 +115,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                     },
                     Message = $"The user is registered successfully ,but can not add this user to role due to " +
                     $"this errors : {string.Join(',', addToRoleResult.Errors.Select(x => x.Description))}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

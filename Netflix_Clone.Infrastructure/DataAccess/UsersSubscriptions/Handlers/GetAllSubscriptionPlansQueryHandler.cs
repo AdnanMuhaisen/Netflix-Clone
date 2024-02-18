@@ -28,7 +28,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
                 {
                     Result = null!,
                     Message = "There`s no subscription plans",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

@@ -34,7 +34,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                         IsDeleted = false,
                     },
                     Message = $"The target TV Show to delete with id {request.tVShowId} does not exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -52,7 +52,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                         IsDeleted = false,
                     },
                     Message = $"Can not find the target TV Show directory",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

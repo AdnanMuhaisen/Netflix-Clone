@@ -22,7 +22,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
                     Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} does not exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -32,7 +32,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
                     Message = $"The role with name {request.assignUserToRoleRequestDto.RoleName} does not exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -42,7 +42,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
                     Message = $"The user with id {request.assignUserToRoleRequestDto.UserId} Is already in the role : {request.assignUserToRoleRequestDto.RoleName}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -61,7 +61,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                 {
                     Result = new AssignUserToRoleResponseDto { IsAssigned = false },
                     Message = string.Join(',', result.Errors.Select(x => x.Description)),
-                    IsSucceed= true
+                    IsSucceed= false
                 };
         }
     }

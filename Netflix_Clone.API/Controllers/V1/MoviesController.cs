@@ -18,25 +18,19 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class MoviesController : BaseController<MoviesController>
+    public class MoviesController(
+        ILogger<MoviesController> logger,
+        ISender sender,
+        IWebHostEnvironment webHostEnvironment,
+        IFileCompressor fileCompressor,
+        IOptions<ContentMovieOptions> contentOptions)
+        
+        : BaseController<MoviesController>(logger)
     {
-        private readonly IMediator mediator;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly IFileCompressor fileCompressor;
-        private readonly IOptions<ContentMovieOptions> contentOptions;
-
-        public MoviesController(ILogger<MoviesController> logger,
-            IMediator mediator,
-            IWebHostEnvironment webHostEnvironment,
-            IFileCompressor fileCompressor,
-            IOptions<ContentMovieOptions> contentOptions)
-            : base(logger)
-        {
-            this.mediator = mediator;
-            this.webHostEnvironment = webHostEnvironment;
-            this.fileCompressor = fileCompressor;
-            this.contentOptions = contentOptions;
-        }
+        private readonly ISender sender = sender;
+        private readonly IWebHostEnvironment webHostEnvironment = webHostEnvironment;
+        private readonly IFileCompressor fileCompressor = fileCompressor;
+        private readonly IOptions<ContentMovieOptions> contentOptions = contentOptions;
 
         [HttpGet]
         [Route("")]
@@ -44,7 +38,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             logger.LogTrace($"{nameof(GetAllMovies)} is executing");
 
-            var response = await mediator.Send(new GetAllMoviesQuery());
+            var response = await sender.Send(new GetAllMoviesQuery());
 
             return response.IsSucceed
                 ? Ok(response)
@@ -60,15 +54,13 @@ namespace Netflix_Clone.API.Controllers.V1
 
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(movieToInsertDto.Adapt<AddNewMovieCommand>());
+                var response = await sender.Send(movieToInsertDto.Adapt<AddNewMovieCommand>());
 
                 logger.LogTrace($"The {nameof(AddNewMovie)} executed successfully");
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Created("", response)
-                        : BadRequest(response);
+                    return Created("", response);
                 }
                 else
                 {
@@ -87,17 +79,15 @@ namespace Netflix_Clone.API.Controllers.V1
         [HttpDelete]
         [Route("DELETE/{ContentId:int}")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteMovie(int ContentId)
+        public async Task<ActionResult<ApiResponseDto<bool>>> DeleteMovie(int ContentId)
         {
             var deleteMovieCommand = new DeleteMovieCommand(ContentId);
 
-            var response = await mediator.Send(deleteMovieCommand);
+            var response = await sender.Send(deleteMovieCommand);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result)
             {
-                return response.Result
-                    ? NoContent()
-                    : BadRequest(response);
+                return NoContent();
             }
             else
             {
@@ -112,13 +102,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             var command = new UpdateMovieCommand(movieDto);
 
-            var response = await mediator.Send(command);
+            var response = await sender.Send(command);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? NoContent()
-                    : BadRequest(response);
+                return NoContent();
             }
             else
             {
@@ -132,7 +120,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             logger.LogTrace("The get movie action in started"); ;
 
-            var response = await mediator.Send(new GetMovieQuery(ContentId));
+            var response = await sender.Send(new GetMovieQuery(ContentId));
 
             logger.LogTrace("The move with id : {id} is retrieved successfully",
                 response.Result.Id);
@@ -148,15 +136,13 @@ namespace Netflix_Clone.API.Controllers.V1
                         ContentId = ContentId
                     });
 
-                    await mediator.Send(addToUserHistoryCommand);
+                    await sender.Send(addToUserHistoryCommand);
                 }
             }
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound(response);
+                return Ok(response);
             }
             else
             {
@@ -177,13 +163,11 @@ namespace Netflix_Clone.API.Controllers.V1
 
                 logger.LogTrace("Try to execute the download movie command");
 
-                var response = await mediator.Send(command);
+                var response = await sender.Send(command);
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Created("", response)
-                        : BadRequest(response);
+                    return Created("", response);
                 }
                 else
                 {
@@ -203,13 +187,11 @@ namespace Netflix_Clone.API.Controllers.V1
             var query = new GetRecommendedMoviesQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
 
-            var response = await mediator.Send(query);
+            var response = await sender.Send(query);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound(response);
+                return Ok(response);
             }
             else
             {
@@ -228,13 +210,11 @@ namespace Netflix_Clone.API.Controllers.V1
             [FromQuery] int? DirectorId = default)
         {
             var query = new GetMoviesByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId);
-            var response = await mediator.Send(query);
+            var response = await sender.Send(query);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound(response);
+                return Ok(response);
             }
             else
             {

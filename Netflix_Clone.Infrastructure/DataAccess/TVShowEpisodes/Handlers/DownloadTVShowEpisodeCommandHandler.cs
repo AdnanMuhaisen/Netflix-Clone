@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 {
                     Result = null!,
                     Message = "Can not find the target TV Show",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -47,7 +47,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 {
                     Result = null!,
                     Message = $"The {targetTVShow.Title} TvShow Is unavailable to download",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -66,7 +66,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"A user with an ID {request.userId} does not have an active subscription !"
                 };
             }
@@ -97,7 +97,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The user can not download the movie because it is exceeds the times of " +
                     $"downloads supported by the subscription !"
                 };
@@ -124,7 +124,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 {
                     Result = null!,
                     Message = $"The episode file can not be found",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

@@ -34,9 +34,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 .TVShows
                 .AsNoTracking()
                 .Where(tvShowsFilter)
-                .ToList();
-
-            tvShows ??= new List<TVShow>();
+                .ToList() ?? [];
 
             return new ApiResponseDto<IEnumerable<TVShowDto>>
             {

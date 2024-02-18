@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The target TV Show with Id: {request.TVShowEpisodeToInsertDto.TVShowId} does not exist !"
                 };
             }
@@ -51,7 +51,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The target TV Show season with Id: {request.TVShowEpisodeToInsertDto.SeasonId} does not exist !"
                 };
             }
@@ -65,7 +65,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The target Episode with number : " +
                     $"{request.TVShowEpisodeToInsertDto.EpisodeNumber} in the season number " +
                     $"{request.TVShowEpisodeToInsertDto.SeasonNumber} in the TV Show with id : " +
@@ -83,7 +83,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The directory of the target TV Show with id {request.TVShowEpisodeToInsertDto.TVShowId} does not exist"
                 };
             }
@@ -96,7 +96,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The directory of the target TV Show season with id {request.TVShowEpisodeToInsertDto.SeasonId} does not exist"
                 };
             }
@@ -112,7 +112,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The episode of the TVShow with id : {targetTVShow.Id}" +
                     $" in season number {targetSeason.SeasonNumber} with episode number : {request.TVShowEpisodeToInsertDto.EpisodeNumber}" +
                     $" is already exist"
@@ -126,7 +126,12 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             }
             catch(Exception ex)
             {
-                throw new InsertionException(ex.Message);
+                return new ApiResponseDto<TVShowEpisodeDto>
+                {
+                    Result = null!,
+                    IsSucceed = false,
+                    Message = "Can not add the episode"
+                };
             }
 
             //save to the database:

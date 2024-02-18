@@ -29,7 +29,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == request.contentId);
 
-            ArgumentNullException.ThrowIfNull(targetMovieToRetrieve);
+            if(targetMovieToRetrieve is null)
+            {
+                return new ApiResponseDto<MovieDto>
+                {
+                    Result = null!,
+                    IsSucceed = false,
+                    Message = "Can not find the target movie"
+                };
+            }
 
             logger.LogTrace("The movie is retrieved successfully");
 

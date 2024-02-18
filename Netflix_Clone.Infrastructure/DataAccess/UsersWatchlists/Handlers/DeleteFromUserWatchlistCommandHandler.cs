@@ -29,7 +29,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
                     Message = "Can not find the user watch list !",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -39,7 +39,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 {
                     Result = new DeletionResultDto { IsDeleted = false},
                     Message = $"Can not find the content with id : {request.contentId} in the user watchlist !",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

@@ -36,7 +36,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<MovieDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The movie with file {request.movieToInsertDto.Location} does not exist"
                 };
             }
@@ -48,7 +48,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<MovieDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"Invalid file extension {Path.GetExtension(request.movieToInsertDto.Location)}"
                 };
             }
@@ -63,7 +63,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<MovieDto> 
                 { 
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The movie with title {request.movieToInsertDto.Title} is already exist"
                 };
             }
@@ -77,7 +77,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<MovieDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The mapper package can not map the the {nameof(request.movieToInsertDto)} entity to {nameof(movie)}"
                 };
             }

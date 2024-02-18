@@ -13,28 +13,23 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class TVShowSeasonsController : BaseController<TVShowSeasonsController>
+    public class TVShowSeasonsController(
+        ILogger<TVShowSeasonsController> logger,
+        ISender sender)
+        
+        : BaseController<TVShowSeasonsController>(logger)
     {
-        private readonly IMediator mediator;
-
-        public TVShowSeasonsController(ILogger<TVShowSeasonsController> logger,
-            IMediator mediator)
-            : base(logger)
-        {
-            this.mediator = mediator;
-        }
+        private readonly ISender sender = sender;
 
         [HttpGet]
         [Route("GET/{TVShowContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowSeasonDto>>>> GetTVShowSeasons(int TVShowContentId)
         {
-            var response = await mediator.Send(new GetTVShowSeasonsQuery(TVShowContentId));
+            var response = await sender.Send(new GetTVShowSeasonsQuery(TVShowContentId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound();
+                return Ok(response);
             }
             else
             {
@@ -49,13 +44,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowSeasonToInsertDto.Adapt<AddNewTVShowSeasonCommand>());
+                var response = await sender.Send(tVShowSeasonToInsertDto.Adapt<AddNewTVShowSeasonCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Created("", response)
-                        : BadRequest(response);
+                    return Created("", response);
                 }
                 else
                 {
@@ -77,13 +70,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(deleteTVShowSeasonRequestDto.Adapt<DeleteTVShowSeasonCommand>());
+                var response = await sender.Send(deleteTVShowSeasonRequestDto.Adapt<DeleteTVShowSeasonCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result.IsDeleted)
                 {
-                    return response.Result.IsDeleted
-                        ? NoContent()
-                        : BadRequest(response);
+                    return NoContent();
                 }
                 else
                 {

@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                     Result = null!,
                     Message = $"Can not add the season number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
                     $"with name : {request.tVShowSeasonToInsertDto.SeasonName} because it is already exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -46,7 +46,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                 .TVShows
                 .SingleOrDefaultAsync(x => x.Id == request.tVShowSeasonToInsertDto.TVShowId));
 
-            ArgumentNullException.ThrowIfNull(targetSeasonTVShow);
+            if(targetSeasonTVShow is null)
+            {
+                return new ApiResponseDto<TVShowSeasonDto>
+                {
+                    Result = null!,
+                    IsSucceed = false,
+                    Message = "Can not find the target season"
+                };
+            }
 
             string targetTVShowDirectoryName = Path.Combine(options.Value.TargetDirectoryToSaveTo,
                 targetSeasonTVShow.Title);
@@ -58,7 +66,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                     Result = null!,
                     Message = $"The target TV Show with id : {request.tVShowSeasonToInsertDto.TVShowId}" +
                     $" that you want to add season for does not exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -73,7 +81,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                     Result = null!,
                     Message = $"Can not add season with number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
                     $"because the last season number is equals : {lastSeasonNumberForTheTargetTVShow}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

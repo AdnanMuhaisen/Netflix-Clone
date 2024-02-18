@@ -28,7 +28,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
                 {
                     Result = false,
                     Message = $"Can not Find the content with id {request.addToUserWatchHistoryRequestDto.ContentId}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

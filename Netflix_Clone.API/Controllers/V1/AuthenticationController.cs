@@ -14,19 +14,14 @@ namespace Netflix_Clone.API.Controllers.V1
     [ApiController]
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
-    public class AuthenticationController : BaseController<AuthenticationController>
+    public class AuthenticationController(
+        ILogger<AuthenticationController> logger,
+        ISender sender,
+        IOptions<UserRolesOptions> userRolesOptions)
+        : BaseController<AuthenticationController>(logger)
     {
-        private readonly ISender mediator;
-        private readonly IOptions<UserRolesOptions> userRolesOptions;
-
-        public AuthenticationController(ILogger<AuthenticationController> logger,
-            IMediator mediator,
-            IOptions<UserRolesOptions> userRolesOptions)
-            : base(logger)
-        {
-            this.mediator = mediator;
-            this.userRolesOptions = userRolesOptions;
-        }
+        private readonly ISender sender = sender;
+        private readonly IOptions<UserRolesOptions> userRolesOptions = userRolesOptions;
 
         [HttpPost]
         [Route("POST/Register")]
@@ -34,7 +29,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
+                var response = await sender.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
                 return response.IsSucceed ? Ok(response) : BadRequest(response);
             }
             else
@@ -54,13 +49,11 @@ namespace Netflix_Clone.API.Controllers.V1
         public async Task<ActionResult<ApiResponseDto<AddNewRoleResponseDto>>> AddNewUserRole([FromRoute] string RoleName)
         {
             var command = new AddNewRoleCommand(RoleName);
-            var response = await mediator.Send(command);
+            var response = await sender.Send(command);
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result.IsAdded)
             {
-                return response.Result.IsAdded
-                    ? Created("", response.Result)
-                    : BadRequest(response);
+                return Created("", response.Result);
             }
             else
             {
@@ -74,7 +67,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(new UserLoginCommand(loginRequestDto, HttpContext));
+                var response = await sender.Send(new UserLoginCommand(loginRequestDto, HttpContext));
                 return response.IsSucceed
                 ? Ok(response)
                 : BadRequest(response);
@@ -89,19 +82,17 @@ namespace Netflix_Clone.API.Controllers.V1
         }
 
         [HttpPost]
-        [Route("POST/AssignRoleToUser")]
+        [Route("POST/AssignUserToRole")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<AssignUserToRoleResponseDto>>> AssignUserToRole([FromBody] AssignUserToRoleRequestDto assignUserToRoleRequestDto)
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(assignUserToRoleRequestDto.Adapt<AssignUserToRoleCommand>());
+                var response = await sender.Send(assignUserToRoleRequestDto.Adapt<AssignUserToRoleCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result.IsAssigned)
                 {
-                    return response.Result.IsAssigned
-                    ? Ok(response)
-                    : BadRequest(response);
+                    return Ok(response);
                 }
                 else
                 {

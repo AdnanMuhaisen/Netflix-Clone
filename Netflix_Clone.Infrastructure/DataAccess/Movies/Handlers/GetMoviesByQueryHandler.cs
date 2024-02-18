@@ -35,9 +35,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 .Movies
                 .AsNoTracking()
                 .Where(moviesFilter)
-                .ToList();
-
-            movies ??= [];
+                .ToList() ?? [];
 
             return Task.FromResult(new ApiResponseDto<IEnumerable<MovieDto>>
             {

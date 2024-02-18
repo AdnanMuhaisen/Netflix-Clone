@@ -35,7 +35,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 {
                     Result = null!,
                     Message = "Can not find the target episode !",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

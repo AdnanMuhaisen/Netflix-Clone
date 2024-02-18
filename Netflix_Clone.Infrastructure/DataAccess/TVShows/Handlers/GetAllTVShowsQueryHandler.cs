@@ -34,7 +34,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 return new ApiResponseDto<IEnumerable<TVShowDto>> 
                 { 
                     Result = Enumerable.Empty<TVShowDto>(),
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

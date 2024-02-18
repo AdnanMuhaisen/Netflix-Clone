@@ -34,7 +34,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                     Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The target season with id: {request.deleteTVShowSeasonRequestDto.TVShowSeasonId}," +
                     $" number: {request.deleteTVShowSeasonRequestDto.TVShowSeasonNumber} does not exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -52,7 +52,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
                     Message = $"The season directory does not exists",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 

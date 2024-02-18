@@ -31,7 +31,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                         UserDto = default!,
                     },
                     Message = "Invalid Username Or Password",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -49,36 +49,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                 Message = "The user logged in successfully",
                 IsSucceed = true
             };
-        }
-
-        private async Task IdentitySignInAsync(ApplicationUser applicationUser , string Token,HttpContext httpContext)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(Token);
-
-            var identity = new ClaimsIdentity();
-            identity.AddClaims(
-            [
-                new Claim(JwtRegisteredClaimNames.Sub,
-                jwtToken.Claims.First(x=>x.Type == JwtRegisteredClaimNames.Sub).Value),
-
-                new Claim(JwtRegisteredClaimNames.Email,
-                jwtToken.Claims.First(x=>x.Type == JwtRegisteredClaimNames.Email).Value),
-
-                new Claim(JwtRegisteredClaimNames.Name,
-                jwtToken.Claims.First(x=>x.Type == JwtRegisteredClaimNames.Name).Value),
-            ]);
-
-
-            foreach (var claim in jwtToken.Claims.Where(x=>x.Type == "role"))
-            {
-                identity.AddClaim(new Claim("role", claim.Value));
-            }
-            identity.AddClaim(new Claim(ClaimTypes.Name, applicationUser.UserName!));
-
-            var principal = new ClaimsPrincipal(identity);
-
-            await httpContext.SignInAsync(IdentityConstants.ExternalScheme, principal);
         }
     }
 }

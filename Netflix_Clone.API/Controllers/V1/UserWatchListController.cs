@@ -14,16 +14,13 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class UserWatchListController : BaseController<UserWatchListController>
+    public class UserWatchListController(
+        ILogger<UserWatchListController> logger,
+        ISender sender)
+        
+        : BaseController<UserWatchListController>(logger)
     {
-        private readonly IMediator mediator;
-
-        public UserWatchListController(ILogger<UserWatchListController> logger,
-            IMediator mediator)
-            : base(logger)
-        {
-            this.mediator = mediator;
-        }
+        private readonly ISender sender = sender;
 
         [HttpGet]
         [Route("GET")]
@@ -31,13 +28,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             //This endpoint will create a watchlist for the user if the user has not created the watchlist 
 
-            var response = await mediator.Send(new GetUserWatchListQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value));
+            var response = await sender.Send(new GetUserWatchListQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound();
+                return Ok(response);
             }
             else
             {
@@ -49,13 +44,11 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("POST/AddToUserWatchlist/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<bool>>> AddToUserWatchList([FromRoute] int ContentId)
         {
-            var response = await mediator.Send(new AddToUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value, ContentId));
+            var response = await sender.Send(new AddToUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value, ContentId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result)
             {
-                return response.Result
-                    ? Ok(response)
-                    : BadRequest(response);
+                return Ok(response);
             }
             else
             {
@@ -67,14 +60,12 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("DELETE/DeleteFromUserWatchlist/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteFromUserWatchlist([FromRoute] int ContentId)
         {
-            var response = await mediator.Send(new DeleteFromUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+            var response = await sender.Send(new DeleteFromUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 ContentId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? NoContent()
-                    : BadRequest(response);
+                return NoContent();
             }
             else
             {

@@ -24,7 +24,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                         IsAdded = false
                     },
                     Message = $"Invalid Role Name: {request.roleName}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                         IsAdded = false
                     },
                     Message = $"The role with the name {request.roleName} is already exist",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -61,7 +61,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
                     {
                         Result = new AddNewRoleResponseDto { IsAdded = false },
                         Message = string.Join(',', result.Errors.Select(x => x.Description)),
-                        IsSucceed = true
+                        IsSucceed = false
                     };
             }
             catch(Exception ex)

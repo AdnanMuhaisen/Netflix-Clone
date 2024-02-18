@@ -34,7 +34,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 return new ApiResponseDto<TVShowDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The TV Show with title : {request.tVShowToInsertDto.Title} is already exist"
                 };
             }
@@ -91,7 +91,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 return new ApiResponseDto<TVShowDto>
                 {
                     Result = null!,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"Can not add the TV-Show with title : {request.tVShowToInsertDto.Title} because this exception : {ex.Message}"
                 };
             }

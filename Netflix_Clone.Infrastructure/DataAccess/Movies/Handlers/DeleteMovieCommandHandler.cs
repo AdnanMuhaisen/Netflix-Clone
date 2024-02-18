@@ -42,7 +42,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = $"The movie with the ID = {request.contentId} was not found"
                 };
             }
@@ -60,7 +60,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = "Can not delete the file"
                 };
             }
@@ -74,7 +74,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
-                    IsSucceed = true,
+                    IsSucceed = false,
                     Message = "Can not delete the compressed file"
                 };
             }

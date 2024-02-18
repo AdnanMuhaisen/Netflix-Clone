@@ -16,16 +16,13 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class TVShowEpisodesController : BaseController<TVShowEpisodesController>
+    public class TVShowEpisodesController(
+        ILogger<TVShowEpisodesController> logger,
+        ISender sender)
+        
+        : BaseController<TVShowEpisodesController>(logger)
     {
-        private readonly IMediator mediator;
-
-        public TVShowEpisodesController(ILogger<TVShowEpisodesController> logger,
-            IMediator mediator)
-            : base(logger)
-        {
-            this.mediator = mediator;
-        }
+        private readonly ISender sender = sender;
 
         //test this end point
         [HttpGet]
@@ -35,13 +32,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowSeasonEpisodesRequestDto.Adapt<GetTVShowSeasonEpisodesQuery>());
+                var response = await sender.Send(tVShowSeasonEpisodesRequestDto.Adapt<GetTVShowSeasonEpisodesQuery>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Ok(response)
-                        : NotFound();
+                    return Ok(response);
                 }
                 else
                 {
@@ -62,13 +57,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowEpisodeToInsert.Adapt<AddNewTVShowEpisodeCommand>());
+                var response = await sender.Send(tVShowEpisodeToInsert.Adapt<AddNewTVShowEpisodeCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is null
-                        ? Created("", response)
-                        : BadRequest(response);
+                    return Created("", response);
                 }
                 else
                 {
@@ -90,13 +83,11 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowSeasonEpisodeToDeleteDto.Adapt<DeleteSeasonEpisodeCommand>());
+                var response = await sender.Send(tVShowSeasonEpisodeToDeleteDto.Adapt<DeleteSeasonEpisodeCommand>());
 
-                if (response.IsSucceed)
+                if (response.IsSucceed && response.Result.IsDeleted)
                 {
-                    return response.Result.IsDeleted
-                        ? NoContent()
-                        : BadRequest(response);
+                    return NoContent();
                 }
                 else
                 {
@@ -116,7 +107,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
-                var response = await mediator.Send(tVShowEpisodeRequestDto.Adapt<GetTVShowEpisodeQuery>());
+                var response = await sender.Send(tVShowEpisodeRequestDto.Adapt<GetTVShowEpisodeQuery>());
 
                 if (response.IsSucceed)
                 {
@@ -129,7 +120,7 @@ namespace Netflix_Clone.API.Controllers.V1
                             ApplicationUserId = User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value
                         });
 
-                        await mediator.Send(command);
+                        await sender.Send(command);
                     }
                 }
                 else
@@ -156,12 +147,10 @@ namespace Netflix_Clone.API.Controllers.V1
             {
                 var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto, User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
-                var response = await mediator.Send(command);
-                if (response.IsSucceed)
+                var response = await sender.Send(command);
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    return response.Result is not null
-                        ? Ok(response)
-                        : BadRequest(response);
+                    return Ok(response);
                 }
                 else
                 {

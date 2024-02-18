@@ -38,7 +38,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     DirectorId = m.DirectorId,
                     Location = m.Location
                 })
-                .ToListAsync();
+                .ToListAsync() ?? [];
 
             logger.LogTrace($"The movies are retrieved from the database");
 

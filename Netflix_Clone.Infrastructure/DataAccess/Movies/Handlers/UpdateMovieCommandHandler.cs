@@ -40,7 +40,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 {
                     Result = null!,
                     Message = $"can not find the movie {nameof(targetMovieToUpdate)}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -69,7 +69,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     {
                         Result = null!,
                         Message = $"Can not delete the original file that contains this segment {currentFileName}",
-                        IsSucceed = true
+                        IsSucceed = false
                     };
                 }
 
@@ -85,7 +85,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     {
                         Result = null!,
                         Message = $"Can not delete the compressed file that contains this segment {currentFileName}",
-                        IsSucceed = true
+                        IsSucceed = false
                     };
                 }
 

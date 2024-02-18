@@ -14,28 +14,23 @@ namespace Netflix_Clone.API.Controllers.V1
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
-    public class SubscriptionPlanController : BaseController<SubscriptionPlanController>
+    public class SubscriptionPlanController(
+        ILogger<SubscriptionPlanController> logger,
+        ISender sender)
+        
+        : BaseController<SubscriptionPlanController>(logger)
     {
-        private readonly IMediator mediator;
-
-        public SubscriptionPlanController(ILogger<SubscriptionPlanController> logger,
-            IMediator mediator)
-            : base(logger)
-        {
-            this.mediator = mediator;
-        }
+        private readonly ISender sender = sender;
 
         [HttpGet]
         [Route("")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<SubscriptionPlanDto>>>> GetSubscriptionPlans()
         {
-            var response = await mediator.Send(new GetAllSubscriptionPlansQuery());
+            var response = await sender.Send(new GetAllSubscriptionPlansQuery());
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Ok(response)
-                    : NotFound();
+                return Ok(response);
             }
             else
             {
@@ -53,14 +48,12 @@ namespace Netflix_Clone.API.Controllers.V1
                 return Unauthorized();
             }
 
-            var response = await mediator.Send(new AddNewUserSubscriptionCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
+            var response = await sender.Send(new AddNewUserSubscriptionCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 PlanId));
 
-            if (response.IsSucceed)
+            if (response.IsSucceed && response.Result is not null)
             {
-                return response.Result is not null
-                    ? Created("", response)
-                    : BadRequest(response);
+                return Created("", response);
             }
             else
             {

@@ -37,7 +37,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                         IsDeleted = false
                     },
                     Message = $"Can not find the episode with id {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -62,7 +62,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                         IsDeleted = false,
                     },
                     Message = "Can not find the TV Show Season Directory",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
@@ -78,7 +78,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                         IsDeleted = false,
                     },
                     Message = "Can not find the TV Show Season Episode File",
-                    IsSucceed = true
+                    IsSucceed = false
                 };
             }
 
