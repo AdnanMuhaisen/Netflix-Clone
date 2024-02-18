@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,10 +9,11 @@ using Netflix_Clone.Infrastructure.DataAccess.TVShows.Queries;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowsController : BaseController<TVShowsController>
     {
@@ -30,9 +32,9 @@ namespace Netflix_Clone.API.Controllers
         {
             var response = await mediator.Send(new GetAllTVShowsQuery());
 
-            if(response.IsSucceed)
+            if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : BadRequest();
             }
@@ -53,7 +55,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Created("", response)
                         : BadRequest(response);
                 }
@@ -64,8 +66,8 @@ namespace Netflix_Clone.API.Controllers
             }
             else
             {
-                return BadRequest(new ApiResponseDto<TVShowDto> 
-                { 
+                return BadRequest(new ApiResponseDto<TVShowDto>
+                {
                     Result = null!,
                     Message = "Invalid Model State",
                     IsSucceed = true
@@ -86,7 +88,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result.IsDeleted)
+                return response.Result.IsDeleted
                     ? NoContent()
                     : BadRequest(response);
             }
@@ -103,7 +105,7 @@ namespace Netflix_Clone.API.Controllers
             var response = await mediator.Send(new GetTVShowQuery(TVShowId));
             if (response.IsSucceed)
             {
-                return (response.Result is null)
+                return response.Result is null
                     ? NotFound(response)
                     : Ok(response);
             }
@@ -122,9 +124,9 @@ namespace Netflix_Clone.API.Controllers
 
             var response = await mediator.Send(query);
 
-            if(response.IsSucceed)
+            if (response.IsSucceed)
             {
-                return (response.Result is null)
+                return response.Result is null
                     ? NotFound()
                     : Ok(response);
             }
@@ -147,7 +149,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound();
             }

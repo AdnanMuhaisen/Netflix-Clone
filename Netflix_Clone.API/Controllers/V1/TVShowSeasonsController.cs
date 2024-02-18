@@ -1,4 +1,5 @@
-﻿using Mapster;
+﻿using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,10 +7,11 @@ using Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Queries;
 using Netflix_Clone.Shared.DTOs;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowSeasonsController : BaseController<TVShowSeasonsController>
     {
@@ -30,7 +32,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound();
             }
@@ -51,7 +53,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Created("", response)
                         : BadRequest(response);
                 }
@@ -79,7 +81,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result.IsDeleted)
+                    return response.Result.IsDeleted
                         ? NoContent()
                         : BadRequest(response);
                 }

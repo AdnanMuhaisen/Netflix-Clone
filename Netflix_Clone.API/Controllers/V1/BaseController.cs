@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     public class BaseController<T> : ControllerBase where T : BaseController<T>
     {

@@ -1,4 +1,5 @@
 ﻿
+using Asp.Versioning;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -9,10 +10,11 @@ using Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Queries;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowEpisodesController : BaseController<TVShowEpisodesController>
     {
@@ -37,7 +39,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Ok(response)
                         : NotFound();
                 }
@@ -64,7 +66,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is null)
+                    return response.Result is null
                         ? Created("", response)
                         : BadRequest(response);
                 }
@@ -92,7 +94,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result.IsDeleted)
+                    return response.Result.IsDeleted
                         ? NoContent()
                         : BadRequest(response);
                 }
@@ -118,7 +120,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    if (response.Result is not null&& User.Identity is not null&& User.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == USER_ROLE))
+                    if (response.Result is not null && User.Identity is not null && User.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == USER_ROLE))
                     {
                         // add to user watch history
                         var command = new AddToUserWatchHistoryCommand(new AddToUserWatchHistoryRequestDto
@@ -135,7 +137,7 @@ namespace Netflix_Clone.API.Controllers
                     return BadRequest(response);
                 }
 
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound();
             }
@@ -152,19 +154,19 @@ namespace Netflix_Clone.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto,User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+                var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto, User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
                 var response = await mediator.Send(command);
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Ok(response)
                         : BadRequest(response);
                 }
                 else
                 {
                     return BadRequest(response);
-                }                
+                }
             }
             else
             {

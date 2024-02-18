@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Netflix_Clone.Domain.Options;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 
 namespace Netflix_Clone.API.Extensions.API
@@ -70,6 +72,21 @@ namespace Netflix_Clone.API.Extensions.API
             
             builder.Services.AddAuthorization();
 
+            //api versioning
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = ApiVersionReader.Combine(new QueryStringApiVersionReader("api-version"));
+            })
+                .AddApiExplorer(o =>
+                {
+                    o.GroupNameFormat = "'v'VVV";
+                    o.SubstituteApiVersionInUrl = true;
+                });
+
+
             //configure the logger
             var logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(builder.Configuration)
@@ -82,9 +99,6 @@ namespace Netflix_Clone.API.Extensions.API
             {
                 loggingBuilder.AddSerilog();
             });
-
-
-
 
         }
     }

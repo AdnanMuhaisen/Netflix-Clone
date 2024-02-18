@@ -1,4 +1,5 @@
 ﻿
+using Asp.Versioning;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -7,12 +8,12 @@ using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Authentication.Commands;
 using Netflix_Clone.Shared.DTOs;
-using Netflix_Clone.Shared.Enums;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     public class AuthenticationController : BaseController<AuthenticationController>
     {
         private readonly ISender mediator;
@@ -29,12 +30,12 @@ namespace Netflix_Clone.API.Controllers
 
         [HttpPost]
         [Route("POST/Register")]
-        public async Task<ActionResult<ApiResponseDto<RegistrationResponseDto>>> Register([FromBody]RegistrationRequestDto registrationRequestDto)
+        public async Task<ActionResult<ApiResponseDto<RegistrationResponseDto>>> Register([FromBody] RegistrationRequestDto registrationRequestDto)
         {
             if (ModelState.IsValid)
             {
                 var response = await mediator.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
-                return (response.IsSucceed) ? Ok(response) : BadRequest(response);
+                return response.IsSucceed ? Ok(response) : BadRequest(response);
             }
             else
             {
@@ -74,7 +75,7 @@ namespace Netflix_Clone.API.Controllers
             if (ModelState.IsValid)
             {
                 var response = await mediator.Send(new UserLoginCommand(loginRequestDto, HttpContext));
-                return (response.IsSucceed)
+                return response.IsSucceed
                 ? Ok(response)
                 : BadRequest(response);
             }
@@ -98,7 +99,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result.IsAssigned)
+                    return response.Result.IsAssigned
                     ? Ok(response)
                     : BadRequest(response);
                 }

@@ -1,4 +1,5 @@
 ﻿
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,10 +8,11 @@ using Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Queries;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class UserWatchListController : BaseController<UserWatchListController>
     {
@@ -33,7 +35,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound();
             }
@@ -46,12 +48,12 @@ namespace Netflix_Clone.API.Controllers
         [HttpPost]
         [Route("POST/AddToUserWatchlist/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<bool>>> AddToUserWatchList([FromRoute] int ContentId)
-        {            
+        {
             var response = await mediator.Send(new AddToUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value, ContentId));
 
             if (response.IsSucceed)
             {
-                return (response.Result)
+                return response.Result
                     ? Ok(response)
                     : BadRequest(response);
             }
@@ -70,7 +72,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? NoContent()
                     : BadRequest(response);
             }
@@ -78,7 +80,7 @@ namespace Netflix_Clone.API.Controllers
             {
                 return BadRequest(response);
             }
-        
+
         }
     }
 }

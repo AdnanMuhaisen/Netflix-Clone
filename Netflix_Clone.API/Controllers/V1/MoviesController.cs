@@ -1,22 +1,22 @@
-﻿using Mapster;
+﻿using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Netflix_Clone.Application.Services.Checkers;
 using Netflix_Clone.Application.Services.FileOperations;
 using Netflix_Clone.Domain;
-using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Infrastructure.DataAccess.Common.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Queries;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
-namespace Netflix_Clone.API.Controllers
+namespace Netflix_Clone.API.Controllers.V1
 {
     [ApiController]
     [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class MoviesController : BaseController<MoviesController>
     {
@@ -46,7 +46,7 @@ namespace Netflix_Clone.API.Controllers
 
             var response = await mediator.Send(new GetAllMoviesQuery());
 
-            return (response.IsSucceed)
+            return response.IsSucceed
                 ? Ok(response)
                 : BadRequest(response);
         }
@@ -61,12 +61,12 @@ namespace Netflix_Clone.API.Controllers
             if (ModelState.IsValid)
             {
                 var response = await mediator.Send(movieToInsertDto.Adapt<AddNewMovieCommand>());
-                
+
                 logger.LogTrace($"The {nameof(AddNewMovie)} executed successfully");
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Created("", response)
                         : BadRequest(response);
                 }
@@ -92,10 +92,10 @@ namespace Netflix_Clone.API.Controllers
             var deleteMovieCommand = new DeleteMovieCommand(ContentId);
 
             var response = await mediator.Send(deleteMovieCommand);
-            
-            if(response.IsSucceed)
+
+            if (response.IsSucceed)
             {
-                return (response.Result)
+                return response.Result
                     ? NoContent()
                     : BadRequest(response);
             }
@@ -116,7 +116,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? NoContent()
                     : BadRequest(response);
             }
@@ -130,12 +130,12 @@ namespace Netflix_Clone.API.Controllers
         [Route("GET/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<MovieDto>>> GetMovie([FromRoute] int ContentId)
         {
-            logger.LogTrace("The get movie action in started");;
+            logger.LogTrace("The get movie action in started"); ;
 
             var response = await mediator.Send(new GetMovieQuery(ContentId));
 
             logger.LogTrace("The move with id : {id} is retrieved successfully",
-                ((MovieDto)response.Result).Id);
+                response.Result.Id);
 
             //add to user history if the user role is user:
             if (response.IsSucceed && response.Result is not null)
@@ -149,12 +149,12 @@ namespace Netflix_Clone.API.Controllers
                     });
 
                     await mediator.Send(addToUserHistoryCommand);
-                }                
+                }
             }
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound(response);
             }
@@ -181,7 +181,7 @@ namespace Netflix_Clone.API.Controllers
 
                 if (response.IsSucceed)
                 {
-                    return (response.Result is not null)
+                    return response.Result is not null
                         ? Created("", response)
                         : BadRequest(response);
                 }
@@ -207,7 +207,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return (response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound(response);
             }
@@ -232,7 +232,7 @@ namespace Netflix_Clone.API.Controllers
 
             if (response.IsSucceed)
             {
-                return(response.Result is not null)
+                return response.Result is not null
                     ? Ok(response)
                     : NotFound(response);
             }
