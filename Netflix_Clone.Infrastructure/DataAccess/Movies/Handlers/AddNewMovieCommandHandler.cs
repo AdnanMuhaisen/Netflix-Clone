@@ -7,10 +7,8 @@ using Netflix_Clone.Application.Services.Checkers;
 using Netflix_Clone.Application.Services.IServices;
 using Netflix_Clone.Domain;
 using Netflix_Clone.Domain.Entities;
-using Netflix_Clone.Domain.Exceptions;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
-using Netflix_Clone.Infrastructure.DataAccess.Repositories.UnitOfWork;
 using Netflix_Clone.Shared.DTOs;
 using System.Text;
 

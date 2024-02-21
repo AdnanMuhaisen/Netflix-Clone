@@ -24,7 +24,7 @@ namespace Netflix_Clone.API.Controllers.V1
         IWebHostEnvironment webHostEnvironment,
         IFileCompressor fileCompressor,
         IOptions<ContentMovieOptions> contentOptions)
-        
+
         : BaseController<MoviesController>(logger)
     {
         private readonly ISender sender = sender;
@@ -152,7 +152,8 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPost]
         [Route("POST/Download")]
-        public async Task<ActionResult<ApiResponseDto<DownloadMovieResponseDto>>> DownloadMovie([FromBody] DownloadMovieRequestDto downloadMovieRequestDto)
+        public async Task<ActionResult<ApiResponseDto<DownloadMovieResponseDto>>> DownloadMovie(
+            [FromBody] DownloadMovieRequestDto downloadMovieRequestDto)
         {
             logger.LogTrace("The download movie action is started");
 
@@ -182,7 +183,8 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/GetRecommendedMovies")]
-        public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetRecommendedMovies([FromQuery] int TotalNumberOfItemsRetrieved = 10)
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetRecommendedMovies(
+            [FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
             var query = new GetRecommendedMoviesQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
@@ -221,5 +223,56 @@ namespace Netflix_Clone.API.Controllers.V1
                 return BadRequest();
             }
         }
+
+
+        [HttpPost]
+        [Route("POST/AddRange")]
+        [Obsolete("For testing purposes",true)]
+        public async Task<ActionResult<ApiResponseDto<bool>>> AddRange()
+        {
+            for (int i = 2; i <= 1_000; i++)
+            {
+                var movieToInsert = new MovieToInsertDto
+                {
+                    Title = $"Movie {i}",
+                    ReleaseYear = 2021,
+                    MinimumAgeToWatch = 15,
+                    Synopsis = $"Test Description {i}",
+                    Location = @"C:\Netflix_Clone\Content\pexels-uttar-pradesh-5490959 (720p).mp4",
+                    LengthInMinutes = 5,
+                    LanguageId = 1,
+                    ContentGenreId = 1,
+                    DirectorId = 1,
+                    IsAvailableToDownload = true
+                };
+
+                var response = await sender.Send(new AddNewMovieCommand(movieToInsert));
+
+                if(!response.IsSucceed || response.Result is null)
+                {
+                    return BadRequest(response);
+                }
+            }
+            return Ok();
+        }
+
+
+        [HttpDelete]
+        [Route("DELETE/DeleteRange")]
+        [Obsolete("For testing purposes",true)]
+        public async Task<ActionResult<ApiResponseDto<bool>>> DeleteRange()
+        {
+            for (int i = 38; i <= 223; i++)
+            {
+                var response = await sender.Send(new DeleteMovieCommand(i));
+
+                if(!response.IsSucceed || !response.Result)
+                {
+                    return BadRequest(response);
+                }
+            }
+            return Ok();
+        }
+
     }
 }
