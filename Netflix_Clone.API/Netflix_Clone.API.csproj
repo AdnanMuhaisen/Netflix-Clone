@@ -8,11 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Documentation\V1\SubscriptionPlanController.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Documentation\V1\SubscriptionPlanController.md" />
+    <Compile Remove="Documentation\**" />
+    <Content Remove="Documentation\**" />
+    <EmbeddedResource Remove="Documentation\**" />
+    <None Remove="Documentation\**" />
   </ItemGroup>
 
   <ItemGroup>

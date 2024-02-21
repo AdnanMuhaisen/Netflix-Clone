@@ -25,6 +25,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+if (app.Environment.IsProduction())
+{
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
+}
+
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();

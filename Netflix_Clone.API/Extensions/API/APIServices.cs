@@ -16,6 +16,8 @@ namespace Netflix_Clone.API.Extensions.API
         {
             builder.Services.AddControllers();
 
+            builder.Services.AddProblemDetails();
+
             //Swagger
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

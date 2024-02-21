@@ -122,9 +122,6 @@ namespace Netflix_Clone.API.Controllers.V1
 
             var response = await sender.Send(new GetMovieQuery(ContentId));
 
-            logger.LogTrace("The move with id : {id} is retrieved successfully",
-                response.Result.Id);
-
             //add to user history if the user role is user:
             if (response.IsSucceed && response.Result is not null)
             {
