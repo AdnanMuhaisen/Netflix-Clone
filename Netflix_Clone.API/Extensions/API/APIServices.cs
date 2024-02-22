@@ -18,6 +18,8 @@ namespace Netflix_Clone.API.Extensions.API
 
             builder.Services.AddProblemDetails();
 
+            builder.Configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+
             //Swagger
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

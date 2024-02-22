@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Authentication.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
 using Netflix_Clone.Shared.DTOs;
 
 namespace Netflix_Clone.API.Controllers.V1
@@ -29,6 +30,7 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                ApplicationDbContext applicationDbContext = new ApplicationDbContext();
                 var response = await sender.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
                 return response.IsSucceed ? Ok(response) : BadRequest(response);
             }

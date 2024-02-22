@@ -17,6 +17,12 @@
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.0.0" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0-preview.1.24081.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0-preview.1.24081.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
@@ -24,6 +30,7 @@
     <ProjectReference Include="..\Netflix_Clone.Application\Netflix_Clone.Application.csproj" />
     <ProjectReference Include="..\Netflix_Clone.Domain\Netflix_Clone.Domain.csproj" />
     <ProjectReference Include="..\Netflix_Clone.Infrastructure\Netflix_Clone.Infrastructure.csproj" />
+    <ProjectReference Include="..\Netflix_Clone.Shared\Netflix_Clone.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

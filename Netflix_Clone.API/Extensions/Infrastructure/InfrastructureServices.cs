@@ -17,8 +17,11 @@ namespace Netflix_Clone.API.Extensions.Infrastructure
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-                options.EnableSensitiveDataLogging();
             });
+
+            builder.Services.AddHealthChecks()
+                .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
+                .AddDbContextCheck<ApplicationDbContext>();
 
             //configure the mediator:
             builder.Services.AddMediatR(cfg =>
