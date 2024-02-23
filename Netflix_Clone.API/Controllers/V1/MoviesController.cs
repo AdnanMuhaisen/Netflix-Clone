@@ -81,6 +81,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<bool>>> DeleteMovie(int ContentId)
         {
+            logger.LogTrace($"Try to delete the movie with id : {ContentId}");
+
             var deleteMovieCommand = new DeleteMovieCommand(ContentId);
 
             var response = await sender.Send(deleteMovieCommand);
@@ -116,9 +118,9 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/{ContentId:int}")]
-        public async Task<ActionResult<ApiResponseDto<MovieDto>>> GetMovie([FromRoute] int ContentId)
+        public async Task<ActionResult<ApiResponseDto<MovieDto>>> GetMovieById([FromRoute] int ContentId)
         {
-            logger.LogTrace("The get movie action in started"); ;
+            logger.LogTrace("The get movie by Id action in started"); ;
 
             var response = await sender.Send(new GetMovieQuery(ContentId));
 
@@ -183,6 +185,8 @@ namespace Netflix_Clone.API.Controllers.V1
         public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetRecommendedMovies(
             [FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
+            logger.LogTrace($"Try to get the recommended movies for the user");
+
             var query = new GetRecommendedMoviesQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
 
@@ -208,6 +212,8 @@ namespace Netflix_Clone.API.Controllers.V1
             [FromQuery] int? LanguageId = default,
             [FromQuery] int? DirectorId = default)
         {
+            logger.LogTrace($"Try to get movie by filter");
+
             var query = new GetMoviesByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId);
             var response = await sender.Send(query);
 

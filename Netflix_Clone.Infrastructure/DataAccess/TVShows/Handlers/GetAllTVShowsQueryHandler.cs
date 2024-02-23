@@ -31,6 +31,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(tvShows is null)
             {
+                logger.LogInformation($"There`s no tv shows to retrieve");
+
                 return new ApiResponseDto<IEnumerable<TVShowDto>> 
                 { 
                     Result = Enumerable.Empty<TVShowDto>(),
@@ -57,6 +59,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                     }
                 }
             }
+
+            logger.LogInformation($"The tv shows are retrieved successfully");
 
             return new ApiResponseDto<IEnumerable<TVShowDto>>
             {

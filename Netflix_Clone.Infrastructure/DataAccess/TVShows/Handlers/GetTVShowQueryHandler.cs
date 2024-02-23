@@ -30,6 +30,17 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 .AsSplitQuery()
                 .SingleAsync();
 
+            if(targetTVShow is null)
+            {
+                logger.LogInformation($"There`s no tv show with id : {request.tVShowId} to retrieve");
+
+                return new ApiResponseDto<TVShowDto>
+                {
+                    Result = null!,
+                    IsSucceed = false
+                };
+            }
+
             var result = targetTVShow.Adapt<TVShowDto>();
 
             //encode the locations
@@ -44,6 +55,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                                 Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName)));
                 }
             }
+
+            logger.LogInformation($"The tv show with id : {request.tVShowId} is retrieved successfully");
 
             return new ApiResponseDto<TVShowDto>
             {

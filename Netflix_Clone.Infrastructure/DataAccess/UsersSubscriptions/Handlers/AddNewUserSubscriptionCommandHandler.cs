@@ -25,6 +25,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (!IsSubscriptionPlanExists)
             {
+                logger.LogError($"Can not find the subscription plan with id : {request.planId}");
+
                 return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,
@@ -41,6 +43,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (doesTheUserHaveActiveSubscription)
             {
+                logger.LogError($"The user with id : {request.userId} is already have an active subscription" +
+                    $" plan");
+
                 return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,
@@ -64,6 +69,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The subscription plan with id : {request.planId} is added to the " +
+                    $"user with id : {request.userId}");
+
                 return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = newUserSubscription.Adapt<UserSubscriptionPlanDto>(),
@@ -72,7 +80,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
             }
             catch (Exception ex)
             {
-                //log
+                logger.LogError($"Can not add the subscription plan with id : {request.planId} to the " +
+                    $"user with id : {request.userId} due to : {ex.Message}");
+
                 return new ApiResponseDto<UserSubscriptionPlanDto>
                 {
                     Result = null!,

@@ -30,6 +30,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(targetEpisodeToDelete is null)
             {
+                logger.LogInformation($"Can not find the target episode with id : {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}" +
+                    $" to delete");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -55,6 +58,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!Directory.Exists(pathOfTheEpisodeSeasonDirectory))
             {
+                logger.LogInformation($"Can not find the target episode season directory");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -71,6 +76,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!File.Exists(pathOfTheTargetEpisodeFile))
             {
+                logger.LogInformation($"Can not find the target episode file with path {pathOfTheTargetEpisodeFile} to delete");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -85,10 +92,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             //delete the episode file:
             try
             {
+                logger.LogTrace($"Try to delete the episode file with path : {pathOfTheTargetEpisodeFile}");
+
                 File.Delete(pathOfTheTargetEpisodeFile);
             }
             catch(Exception ex)
             {
+                logger.LogInformation($"Can not delete the episode file with path : {pathOfTheTargetEpisodeFile} " +
+                    $"due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -111,6 +123,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The target episode with episode id : {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}" +
+                    $" is deleted successfully");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -122,6 +137,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             }
             catch(Exception ex)
             {
+                logger.LogInformation($"Can not delete the episode with id : {request.tVShowSeasonEpisodeToDeleteDto.EpisodeID}" +
+                    $" due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto

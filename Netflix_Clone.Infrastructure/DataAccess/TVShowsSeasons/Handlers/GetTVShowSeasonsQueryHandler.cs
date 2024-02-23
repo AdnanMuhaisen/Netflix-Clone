@@ -25,6 +25,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if (tvShowSeasons is null)
             {
+                logger.LogInformation($"There are no seasons to retrieve for the tv show with id : {request.tVShowContentId}");
+
                 return new ApiResponseDto<IEnumerable<TVShowSeasonDto>>
                 { 
                     Result = Enumerable.Empty<TVShowSeasonDto>() ,
@@ -42,6 +44,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                     episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));
                 }
             }
+
+            logger.LogInformation($"The tv show seasons with season id : {request.tVShowContentId} are retrieved " +
+                $"successfully");
 
             return new ApiResponseDto<IEnumerable<TVShowSeasonDto>>
             {

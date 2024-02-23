@@ -26,6 +26,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("GET")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetAllTVShows()
         {
+            logger.LogTrace($"Try to get all the available tv shows");
+
             var response = await sender.Send(new GetAllTVShowsQuery());
 
             if (response.IsSucceed && response.Result is not null)
@@ -45,6 +47,8 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to add the tv show with title : {tVShowToInsertDto.Title}");
+
                 var response = await sender.Send(tVShowToInsertDto.Adapt<AddNewTVShowCommand>());
 
                 if (response.IsSucceed && response.Result is not null)
@@ -75,6 +79,7 @@ namespace Netflix_Clone.API.Controllers.V1
             // there`s a cascade delete between the tbl_TVShows table and the tbl_TVShowSeasons table 
             // but to avoid the cycles or multiple cascade paths problem : i have created a trigger 
             // to delete the season episodes when the season is deleted.
+            logger.LogTrace($"Try to delete the tv show with id : {TVShowId}");
 
             var response = await sender.Send(new DeleteTVShowCommand(TVShowId));
 
@@ -131,6 +136,8 @@ namespace Netflix_Clone.API.Controllers.V1
             [FromQuery] int? LanguageId = default,
             [FromQuery] int? DirectorId = default)
         {
+            logger.LogTrace($"Try to get the tv shows by filtering them");
+
             var response = await sender.Send(new GetTVShowsByQuery(GenreId, ReleaseYear, MinimumAgeToWatch, LanguageId, DirectorId));
 
             if (response.IsSucceed && response.Result is not null)

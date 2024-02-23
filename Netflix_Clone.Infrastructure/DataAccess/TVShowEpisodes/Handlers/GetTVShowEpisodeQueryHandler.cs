@@ -31,6 +31,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (targetTVShow is null)
             {
+                logger.LogInformation($"Can not find the tv show with id : {request.tVShowEpisodeRequestDto.TVShowId}" +
+                    $" to get the episode with id : {request.tVShowEpisodeRequestDto.EpisodeId}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -52,7 +55,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 Encoding.UTF8.GetString(Convert.FromBase64String(targetSeason.DirectoryName)),
                 Encoding.UTF8.GetString(Convert.FromBase64String(targetEpisode.FileName)));
 
-            var test = File.Exists(targetEpisode.FileName);
+            logger.LogInformation($"The episode with id : {request.tVShowEpisodeRequestDto.EpisodeId} is " +
+                $"retrieved successfully");
 
             return new ApiResponseDto<TVShowEpisodeDto>
             {

@@ -25,6 +25,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("GET/{TVShowContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowSeasonDto>>>> GetTVShowSeasons(int TVShowContentId)
         {
+            logger.LogTrace($"Try to get tv show seasons for tv show with id : {TVShowContentId}");
+
             var response = await sender.Send(new GetTVShowSeasonsQuery(TVShowContentId));
 
             if (response.IsSucceed && response.Result is not null)
@@ -40,10 +42,13 @@ namespace Netflix_Clone.API.Controllers.V1
         [HttpPost]
         [Route("POST/AddNewSeasonForTVShow")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto<TVShowSeasonDto>>> AddNewSeasonForTVShow([FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
+        public async Task<ActionResult<ApiResponseDto<TVShowSeasonDto>>> AddNewSeasonForTVShow(
+            [FromBody] TVShowSeasonToInsertDto tVShowSeasonToInsertDto)
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to add a TV Show season for the TV Show with id : {tVShowSeasonToInsertDto.TVShowId}");
+
                 var response = await sender.Send(tVShowSeasonToInsertDto.Adapt<AddNewTVShowSeasonCommand>());
 
                 if (response.IsSucceed && response.Result is not null)
@@ -70,6 +75,9 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to delete the tv show season with tv show id : {deleteTVShowSeasonRequestDto.TVShowId} " +
+                    $"and tv show season id : {deleteTVShowSeasonRequestDto.TVShowSeasonId}");
+
                 var response = await sender.Send(deleteTVShowSeasonRequestDto.Adapt<DeleteTVShowSeasonCommand>());
 
                 if (response.IsSucceed && response.Result.IsDeleted)

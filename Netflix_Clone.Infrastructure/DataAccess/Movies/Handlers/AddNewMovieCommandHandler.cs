@@ -58,6 +58,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(IsMovieExists)
             {
+                logger.LogInformation($"The movie with title : {request.movieToInsertDto.Title} is already exist");
+
                 return new ApiResponseDto<MovieDto> 
                 { 
                     Result = null!,
@@ -87,6 +89,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 contentOptions.Value.TargetDirectoryToCompressTo,
                 movieFileNameToSave);
 
+            logger.LogInformation($"The movie file is compressed and saved successfully");
+
             movie.Location = Convert.ToBase64String(Encoding.UTF8.GetBytes(movieFileNameToSave + $"{Path.GetExtension(request.movieToInsertDto.Location)}"));
 
             // save to the database
@@ -104,6 +108,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                         contentTags.Add(new Tag { TagValue = tag.TagValue.ToLower() });
                     }
                 }
+
+                logger.LogTrace($"Try to save the new tags added with movie");
+
                 await applicationDbContext.SaveChangesAsync();
 
                 movie.Tags.Clear();

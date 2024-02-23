@@ -30,6 +30,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(IsTheTargetShowExist)
             {
+                logger.LogInformation($"The tv show with title : {request.tVShowToInsertDto.Title} is " +
+                    $"already exist");
+
                 return new ApiResponseDto<TVShowDto>
                 {
                     Result = null!,
@@ -76,6 +79,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 applicationDbContext.TVShows.Add(tvShowToInsert);
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The tv show with title : {request.tVShowToInsertDto.Title} " +
+                    $"is added successfully");
+
                 return new ApiResponseDto<TVShowDto>
                 {
                     Result = tvShowToInsert.Adapt<TVShowDto>(),
@@ -85,6 +91,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             }
             catch (Exception ex)
             {
+                logger.LogInformation($"Can not add the tv show with title : {request.tVShowToInsertDto.Title} " +
+                    $"due to : {ex.Message}");
+
                 Directory.Delete(pathOfDirectoryToInsert);
 
                 return new ApiResponseDto<TVShowDto>

@@ -29,6 +29,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if(targetSeasonToDelete is null)
             {
+                logger.LogError($"The target season with id: {request.deleteTVShowSeasonRequestDto.TVShowSeasonId}," +
+                    $" number: {request.deleteTVShowSeasonRequestDto.TVShowSeasonNumber} does not exist");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
@@ -48,6 +51,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if (!Directory.Exists(pathOfTheSeasonDirectory))
             {
+                logger.LogError($"The season directory with path : {pathOfTheSeasonDirectory} does not exists");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
@@ -59,10 +64,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             //delete the season and the episodes of the season
             try
             {
+                logger.LogTrace($"Try to delete the tv show season directory with path : {pathOfTheSeasonDirectory}");
+
                 Directory.Delete(pathOfTheSeasonDirectory, recursive: true);
             }
             catch (Exception ex) 
             {
+                logger.LogError($"Can not delete the tv show season directory with path : {pathOfTheSeasonDirectory}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
@@ -91,6 +100,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The tv show season with id : {request.deleteTVShowSeasonRequestDto.TVShowSeasonId} is " +
+                    $"deleted successfully");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = true },
@@ -99,7 +111,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             }
             catch(Exception ex)
             {
-                //log the error
+                logger.LogError($"Can not delete the tv show season with id : {request.deleteTVShowSeasonRequestDto.TVShowSeasonId} " +
+                    $"due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },

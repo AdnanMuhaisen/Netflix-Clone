@@ -24,6 +24,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
 
             if (subscriptionPlans is null)
             {
+                logger.LogInformation($"There are no subscription plans to retrieve");
+
                 return new ApiResponseDto<IEnumerable<SubscriptionPlanDto>>
                 {
                     Result = null!,
@@ -33,6 +35,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersSubscriptions.Handlers
             }
 
             var result = subscriptionPlans.Adapt<List<SubscriptionPlanDto>>();
+
+            logger.LogInformation("The subscription plans are retrieved successfully");
 
             return new ApiResponseDto<IEnumerable<SubscriptionPlanDto>>
             {

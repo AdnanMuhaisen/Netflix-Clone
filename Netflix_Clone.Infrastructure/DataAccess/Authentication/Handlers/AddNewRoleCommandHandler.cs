@@ -17,6 +17,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
         {
             if (string.IsNullOrWhiteSpace(request.roleName))
             {
+                logger.LogError($"Can not add the role with role name : {request.roleName} because it is null " +
+                    $"or empty");
+
                 return new ApiResponseDto<AddNewRoleResponseDto>
                 {
                     Result = new AddNewRoleResponseDto
@@ -30,6 +33,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
 
             if (await roleManager.RoleExistsAsync(request.roleName))
             {
+                logger.LogError($"The role with name : {request.roleName} is already exist");
+
                 return new ApiResponseDto<AddNewRoleResponseDto>
                 {
                     Result = new AddNewRoleResponseDto
@@ -44,11 +49,19 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
             //add the role 
             try
             {
+                logger.LogTrace($"Try to save the Role : {request.roleName} in the database");
+
                 var result = await roleManager.CreateAsync(new IdentityRole
                 {
                     Name = request.roleName,
                     NormalizedName = request.roleName.ToUpper(),
                 });
+
+                if (result.Succeeded)
+                    logger.LogInformation($"The role with name : {request.roleName} is added successfully");
+                else
+                    logger.LogError($"Can not add the role with name : {request.roleName} because:" +
+                        $"{string.Join(',', result.Errors.Select(x => x.Description))}");
 
                 return result.Succeeded
                     ? new ApiResponseDto<AddNewRoleResponseDto>
@@ -66,6 +79,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Authentication.Handlers
             }
             catch(Exception ex)
             {
+                logger.LogError($"Can not save the role with name : {request.roleName} because this " +
+                    $"exception : {ex.Message}");
+
                 return new ApiResponseDto<AddNewRoleResponseDto>
                 {
                     Result = new AddNewRoleResponseDto { IsAdded = false },

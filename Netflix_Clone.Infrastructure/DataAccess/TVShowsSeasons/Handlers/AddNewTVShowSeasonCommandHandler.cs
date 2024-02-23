@@ -31,6 +31,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             if(currentTVShowSeasons.Any(x=>x.SeasonNumber == request.tVShowSeasonToInsertDto.SeasonNumber 
                 || x.SeasonName == request.tVShowSeasonToInsertDto.SeasonName))
             {
+                logger.LogError($"Can not add the season number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
+                    $"with name : {request.tVShowSeasonToInsertDto.SeasonName} because it is already exist");
+
                 return new ApiResponseDto<TVShowSeasonDto>
                 {
                     Result = null!,
@@ -47,6 +50,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             if(targetSeasonTVShow is null)
             {
+                logger.LogError($"Can not find the target tv show with id : {request.tVShowSeasonToInsertDto.TVShowId}");
+
                 return new ApiResponseDto<TVShowSeasonDto>
                 {
                     Result = null!,
@@ -55,11 +60,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                 };
             }
 
-            string targetTVShowDirectoryName = Path.Combine(options.Value.TargetDirectoryToSaveTo,
+            string targetTVShowDirectoryPath = Path.Combine(options.Value.TargetDirectoryToSaveTo,
                 targetSeasonTVShow.Title);
 
-            if(!Directory.Exists(targetTVShowDirectoryName))
+            if(!Directory.Exists(targetTVShowDirectoryPath))
             {
+                logger.LogError($"Can not find the target tv show directory");
+
                 return new ApiResponseDto<TVShowSeasonDto>
                 {
                     Result = null!,
@@ -70,11 +77,14 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             }
 
             var lastSeasonNumberForTheTargetTVShow = Directory
-                .GetDirectories(targetTVShowDirectoryName)
+                .GetDirectories(targetTVShowDirectoryPath)
                 .Length;
 
             if(request.tVShowSeasonToInsertDto.SeasonNumber != (lastSeasonNumberForTheTargetTVShow + 1))
             {
+                logger.LogError($"Can not add season with number: {request.tVShowSeasonToInsertDto.SeasonNumber}" +
+                    $"because the last season number is equals : {lastSeasonNumberForTheTargetTVShow}");
+
                 return new ApiResponseDto<TVShowSeasonDto>
                 {
                     Result = null!,
@@ -91,7 +101,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
 
             //add season for the TV Show:
             //add the season folder :
-            string pathOfTheDirectoryToAdd = Path.Combine(targetTVShowDirectoryName,
+            string pathOfTheDirectoryToAdd = Path.Combine(targetTVShowDirectoryPath,
                 targetSeasonDirectoryName.ToString());
 
             try
@@ -100,7 +110,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
             }
             catch (Exception ex) 
             {
-                //log
+                logger.LogError($"Can not create the directory for the target season to add");
+
                 return new ApiResponseDto<TVShowSeasonDto>
                 {
                     Result = null!,
@@ -125,9 +136,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowsSeasons.Handlers
                 targetSeasonTVShow.TotalNumberOfSeasons++;
 
                 await applicationDbContext.SaveChangesAsync();
+
+                logger.LogInformation($"The tv show season with number : {request.tVShowSeasonToInsertDto.SeasonNumber} " +
+                    $"for the target tv show with id : {request.tVShowSeasonToInsertDto.TVShowId} is added successfully");
             }
             catch(Exception ex) 
-            { 
+            {
+                logger.LogError($"Can not add the target tv show season for the tv show with id : {request.tVShowSeasonToInsertDto.TVShowId} " +
+                    $"due to : {ex.Message}");
+
                 Directory.Delete(pathOfTheDirectoryToAdd, true);
 
                 return new ApiResponseDto<TVShowSeasonDto>

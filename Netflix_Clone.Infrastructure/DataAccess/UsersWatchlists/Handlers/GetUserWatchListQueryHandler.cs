@@ -27,6 +27,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
             if (userWatchList is null)
             {
                 //create a user watchlist
+                logger.LogTrace($"Create a user watch list for the user with id : {request.userId}");
+
                 userWatchList = new UserWatchList
                 {
                     UserId = request.userId
@@ -37,6 +39,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
                     await applicationDbContext.SaveChangesAsync();
 
+                    logger.LogInformation($"The user watch list for the user with id : {request.userId} " +
+                        $"is created successfully");
+
                     return new ApiResponseDto<UserWatchListDto>
                     {
                         Result = userWatchList.Adapt<UserWatchListDto>(),
@@ -45,6 +50,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 }
                 catch (Exception ex)
                 {
+                    logger.LogError($"Can not create a user watch list for the user with id due to :" +
+                        $"{ex.Message}");
+
                     return new ApiResponseDto<UserWatchListDto>
                     {
                         Result = null!,
@@ -55,6 +63,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
             }
 
             var result = userWatchList.Adapt<UserWatchListDto>();
+
+            logger.LogInformation($"The user watch list for the user with id : {request.userId} " +
+                $"is created successfully");
 
             return new ApiResponseDto<UserWatchListDto>
             {

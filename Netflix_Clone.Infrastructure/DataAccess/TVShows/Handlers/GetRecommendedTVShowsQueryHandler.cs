@@ -17,6 +17,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
         public async Task<ApiResponseDto<IEnumerable<TVShowDto>>> Handle(GetRecommendedTVShowsQuery request, CancellationToken cancellationToken)
         {
+            logger.LogTrace($"Try to get the user history for user with id : {request.userId}");
+
             var userHistory = await applicationDbContext
                 .UsersWatchHistories
                 .AsNoTracking()
@@ -42,6 +44,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             // in case of there`s no movies according to preferred genres
             if (userHistory is null || !userHistory.Any() || !preferredGenres.Any())
             {
+                logger.LogInformation($"The user with id : {request.userId} has no history to retrieve");
+
                 // return random movies
                 recommendedTvShows = await applicationDbContext
                     .TVShows
@@ -51,6 +55,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                     .ToListAsync();
 
                 recommendedTvShows ??= new List<TVShow>();
+
+                logger.LogInformation($"There`s no recommended tv shows to retrieve");
 
                 return new ApiResponseDto<IEnumerable<TVShowDto>>
                 {
@@ -79,6 +85,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             }
 
             var result = recommendedTvShows.Adapt<List<TVShowDto>>();
+
+            logger.LogInformation($"The recommended tv shows for the user with id : {request.userId} " +
+                $"are retrieved successfully");
 
             return new ApiResponseDto<IEnumerable<TVShowDto>>
             {

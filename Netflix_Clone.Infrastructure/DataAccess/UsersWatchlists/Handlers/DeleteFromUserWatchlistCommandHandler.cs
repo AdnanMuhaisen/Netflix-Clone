@@ -25,6 +25,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (targetWatchList is null)
             {
+                logger.LogError($"Can not find the user watch list for the user with id : {request.userId}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false },
@@ -35,6 +37,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (!targetWatchList.WatchListContents.Any(x => x.Id == request.contentId))
             {
+                logger.LogError($"Can not find the content with id : {request.contentId} in the user watchlist !");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted = false},
@@ -53,6 +57,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogTrace($"The content with content id : {request.contentId} is deleted successfully from " +
+                    $"the user watch list for the user with id : {request.userId}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto{IsDeleted=true },
@@ -61,6 +68,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
             }
             catch (Exception ex)
             {
+                logger.LogError($"Can not delete the content with id : {request.contentId} from the user watch " +
+                    $"list for the user with id : {request.userId} due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto { IsDeleted=false},

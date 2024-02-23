@@ -76,6 +76,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             }
 
             //validate if the user verified to download based on user subscription plan
+            logger.LogTrace($"Try to get an active subscription for the user with id : {request.userId}" +
+                $"to validate if the user is able to download the content");
+
             var activeUserSubscriptionPlan = await applicationDbContext
                 .UsersSubscriptions
                 .AsNoTracking()
@@ -86,6 +89,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(activeUserSubscriptionPlan is null)
             {
+                logger.LogInformation($"The user with id : {request.userId} has not an active subscription" +
+                    $" plan");
+
                 return new ApiResponseDto<DownloadMovieResponseDto>
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },
@@ -115,6 +121,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
             {
+                logger.LogInformation($"The number Of User Downloads For The Target Subscription is exceeds " +
+                    $"the download Times Supported By The Subscription Plan for the user with id : {request.userId}");
+
                 return new ApiResponseDto<DownloadMovieResponseDto>
                 {
                     Result = new DownloadMovieResponseDto { IsDownloaded = false },

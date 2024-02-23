@@ -17,6 +17,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 
         public async Task<ApiResponseDto<bool>> Handle(AddToUserWatchHistoryCommand request, CancellationToken cancellationToken)
         {
+            logger.LogTrace($"Try to fin the content with id : {request.addToUserWatchHistoryRequestDto.ContentId}" +
+                $" to add to the user watch list");
             bool IsTargetContentExist = unitOfWork
                 .ContentRepository
                 .GetAllAsNoTracking()
@@ -24,6 +26,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 
             if (!IsTargetContentExist)
             {
+                logger.LogInformation($"Can not find the content with id : {request.addToUserWatchHistoryRequestDto.ContentId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
@@ -42,6 +46,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
 
                 await unitOfWork.SaveChangesAsync();
 
+                logger.LogInformation($"The record is saved in the user watch list for the user with " +
+                    $"id : {request.addToUserWatchHistoryRequestDto.ApplicationUserId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = true,
@@ -51,6 +58,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Common.Handlers
             }
             catch (Exception ex)
             {
+                logger.LogInformation($"Can not add the content with id : {request.addToUserWatchHistoryRequestDto.ContentId}" +
+                    $"to the user watch list for the user with id : {request.addToUserWatchHistoryRequestDto.ApplicationUserId} " +
+                    $"due to : {ex.Message}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,

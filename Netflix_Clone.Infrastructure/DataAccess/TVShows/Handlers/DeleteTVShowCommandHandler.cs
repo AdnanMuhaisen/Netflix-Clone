@@ -27,6 +27,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(targetTVShowToDelete is null)
             {
+                logger.LogError($"Can not find the target tv show with id : {request.tVShowId} to delete");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -45,6 +47,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
 
             if(!Directory.Exists(pathOfTheTargetTVShow))
             {
+                logger.LogError($"Can not find the target tv show file with path : {pathOfTheTargetTVShow}" +
+                    $" to delete");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -63,6 +68,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             }
             catch(Exception ex)
             {
+                logger.LogError($"Can not delete the tv show directory with path : {pathOfTheTargetTVShow} " +
+                    $"due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto
@@ -97,7 +105,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
             }
             catch(Exception ex)
             {
-                //log
+                logger.LogError($"Can not delete the tv show with id : {request.tVShowId} from the " +
+                    $"database due to : {ex.Message}");
+
                 return new ApiResponseDto<DeletionResultDto>
                 {
                     Result = new DeletionResultDto

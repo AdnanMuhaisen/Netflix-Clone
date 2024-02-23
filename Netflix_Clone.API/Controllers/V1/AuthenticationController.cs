@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Domain.Options;
@@ -26,12 +27,17 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPost]
         [Route("POST/Register")]
-        public async Task<ActionResult<ApiResponseDto<RegistrationResponseDto>>> Register([FromBody] RegistrationRequestDto registrationRequestDto)
+        public async Task<ActionResult<ApiResponseDto<RegistrationResponseDto>>> Register(
+            [FromBody] RegistrationRequestDto registrationRequestDto)
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to register the user with email : {registrationRequestDto.Email}");
+
                 ApplicationDbContext applicationDbContext = new ApplicationDbContext();
+
                 var response = await sender.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
+
                 return response.IsSucceed ? Ok(response) : BadRequest(response);
             }
             else
@@ -50,6 +56,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<AddNewRoleResponseDto>>> AddNewUserRole([FromRoute] string RoleName)
         {
+            logger.LogTrace($"Try to add the user role : {RoleName}");
+
             var command = new AddNewRoleCommand(RoleName);
             var response = await sender.Send(command);
 
@@ -69,7 +77,10 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to login the user with email : {loginRequestDto.Email}");
+
                 var response = await sender.Send(new UserLoginCommand(loginRequestDto, HttpContext));
+
                 return response.IsSucceed
                 ? Ok(response)
                 : BadRequest(response);
@@ -90,6 +101,9 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to assign the user with id : {assignUserToRoleRequestDto.UserId}" +
+                    $"to the role with name : {assignUserToRoleRequestDto.RoleName}");
+
                 var response = await sender.Send(assignUserToRoleRequestDto.Adapt<AssignUserToRoleCommand>());
 
                 if (response.IsSucceed && response.Result.IsAssigned)

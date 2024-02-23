@@ -16,7 +16,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
     public class UpdateMovieCommandHandler(ApplicationDbContext applicationDbContext,
         ILogger<UpdateMovieCommandHandler> logger,
         IFileManager fileManager,
-        IOptions<ContentMovieOptions> options) : IRequestHandler<UpdateMovieCommand, ApiResponseDto<MovieDto>>
+        IOptions<ContentMovieOptions> options)
+        : IRequestHandler<UpdateMovieCommand, ApiResponseDto<MovieDto>>
     {
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly ILogger<UpdateMovieCommandHandler> logger = logger;

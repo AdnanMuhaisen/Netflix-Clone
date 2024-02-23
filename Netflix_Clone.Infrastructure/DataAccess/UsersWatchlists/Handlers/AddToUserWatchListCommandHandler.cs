@@ -24,6 +24,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (targetContentToAdd is null)
             {
+                logger.LogError($"Can not find the content with id to add it to the user watch list " +
+                    $"for the user with id : {request.userId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
@@ -39,9 +42,13 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                 .AsSplitQuery()
                 .SingleOrDefault(x => x.UserId == request.userId);
 
+            logger.LogTrace($"Try to get the user watch list for the user with id : {request.userId}");
+
             if (userWatchlist is null)
             {
                 //create a user watchlist
+                logger.LogInformation($"Create a user watch list for the user with id : {request.userId}");
+
                 userWatchlist = new UserWatchList
                 {
                     UserId = request.userId,
@@ -53,9 +60,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
                     await applicationDbContext.UsersWatchLists.AddAsync(userWatchlist);
 
                     await applicationDbContext.SaveChangesAsync();
+
+                    logger.LogInformation($"The user watch list for the user with id : {request.userId} " +
+                        $"is created successfully");
                 }
                 catch (Exception ex)
                 {
+                    logger.LogError($"Can not create a user watch list for the user with id : {request.userId} " +
+                        $"due to : {ex.Message}");
+
                     return new ApiResponseDto<bool>
                     {
                         Result = false,
@@ -73,6 +86,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
             if (IsTheContentInTheWatchList)
             {
+                logger.LogError($"The content with id : {request.contentId} is already in the user watch list " +
+                    $"for the user with id : {request.userId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = true,
@@ -87,6 +103,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The content with content id : {request.contentId} is added to the user " +
+                    $"watch list for the user with id : {request.userId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = true,
@@ -95,6 +114,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.UsersWatchlists.Handlers
             }
             catch (Exception ex)
             {
+                logger.LogError($"Can not add the content with id : {request.contentId} to the user watch list " +
+                    $"for the user with id : {request.userId}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,

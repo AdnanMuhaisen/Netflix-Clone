@@ -32,6 +32,9 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to get the TV Show episodes with id : {tVShowSeasonEpisodesRequestDto.TVShowId}" +
+                    $"and season id : {tVShowSeasonEpisodesRequestDto.TVShowSeasonId}");
+
                 var response = await sender.Send(tVShowSeasonEpisodesRequestDto.Adapt<GetTVShowSeasonEpisodesQuery>());
 
                 if (response.IsSucceed && response.Result is not null)
@@ -57,6 +60,8 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to add an episode for the tv show with id : {tVShowEpisodeToInsert.TVShowId}");
+
                 var response = await sender.Send(tVShowEpisodeToInsert.Adapt<AddNewTVShowEpisodeCommand>());
 
                 if (response.IsSucceed && response.Result is not null)
@@ -83,6 +88,8 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to delete the tv show episode with id : {tVShowSeasonEpisodeToDeleteDto.EpisodeID}");
+
                 var response = await sender.Send(tVShowSeasonEpisodeToDeleteDto.Adapt<DeleteSeasonEpisodeCommand>());
 
                 if (response.IsSucceed && response.Result.IsDeleted)
@@ -107,6 +114,8 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to get the episode with id : {tVShowEpisodeRequestDto.EpisodeId}");
+
                 var response = await sender.Send(tVShowEpisodeRequestDto.Adapt<GetTVShowEpisodeQuery>());
 
                 if (response.IsSucceed)
@@ -145,6 +154,8 @@ namespace Netflix_Clone.API.Controllers.V1
         {
             if (ModelState.IsValid)
             {
+                logger.LogTrace($"Try to download the tv show episode with id : {downloadEpisodeRequestDto.EpisodeId}");
+
                 var command = new DownloadTVShowEpisodeCommand(downloadEpisodeRequestDto, User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
                 var response = await sender.Send(command);

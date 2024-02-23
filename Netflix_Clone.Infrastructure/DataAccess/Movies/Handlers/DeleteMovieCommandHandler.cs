@@ -56,6 +56,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(!IsOriginalFileDeleted)
             {
+                logger.LogInformation($"Can not delete the file with name : {targetFileName}");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,
@@ -70,6 +72,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(!IsCompressedFileDeleted)
             {
+                logger.LogInformation($"Can not delete the compressed file");
+
                 return new ApiResponseDto<bool>
                 {
                     Result = false,

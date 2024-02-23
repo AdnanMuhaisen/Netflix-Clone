@@ -31,6 +31,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
 
             if(targetMovieToRetrieve is null)
             {
+                logger.LogInformation($"Can not find the movie with id : {request.contentId}");
+
                 return new ApiResponseDto<MovieDto>
                 {
                     Result = null!,

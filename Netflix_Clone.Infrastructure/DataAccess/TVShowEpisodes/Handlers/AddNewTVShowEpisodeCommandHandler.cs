@@ -24,6 +24,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
         public async Task<ApiResponseDto<TVShowEpisodeDto>> Handle(AddNewTVShowEpisodeCommand request, CancellationToken cancellationToken)
         {
+            logger.LogTrace($"Try to find the target tv show with id : {request.TVShowEpisodeToInsertDto.TVShowId}");
+
             var targetTVShow = await applicationDbContext
                 .TVShows
                 .Include(x => x.Seasons)
@@ -33,6 +35,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             
             if(targetTVShow is null)
             {
+                logger.LogInformation($"Can not find the tv show with id : {request.TVShowEpisodeToInsertDto.TVShowId}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -47,6 +51,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 
             if(targetSeason is null)
             {
+                logger.LogInformation($"Can not find the target season with id :" +
+                    $" {request.TVShowEpisodeToInsertDto.SeasonId} , with number :" +
+                    $" {request.TVShowEpisodeToInsertDto.SeasonNumber}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -61,6 +69,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (IsTargetEpisodeExist)
             {
+                logger.LogInformation($"The target episode to add for the TV Show with id :" +
+                    $" {request.TVShowEpisodeToInsertDto.TVShowId} for the season with id : {request.TVShowEpisodeToInsertDto.SeasonId}" +
+                    $" is already exist");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -79,6 +91,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(!Directory.Exists(pathOfTheTVShowDirectory))
             {
+                logger.LogInformation($"Can not find the target tv show directory with this path" +
+                    $" : {pathOfTheTVShowDirectory}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -92,6 +107,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (!Directory.Exists(pathOfTheTargetSeason.ToString()))
             {
+                logger.LogInformation($"Can not find the target season directory with this path" +
+                    $" : {pathOfTheTargetSeason}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -108,6 +126,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if(File.Exists(episodeFilePath))
             {
+                logger.LogInformation($"The episode of the TVShow with id : {targetTVShow.Id}" +
+                    $" in season number {targetSeason.SeasonNumber} with episode number : {request.TVShowEpisodeToInsertDto.EpisodeNumber}" +
+                    $" is already exist");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -121,10 +143,15 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             //create the file and save in the database:
             try
             {
+                logger.LogTrace($"Try to copy the file with path : {request.TVShowEpisodeToInsertDto.Location}");
+
                 File.Copy(request.TVShowEpisodeToInsertDto.Location, episodeFilePath);
             }
             catch(Exception ex)
             {
+                logger.LogInformation($"Can not copy the file : {request.TVShowEpisodeToInsertDto.Location}" +
+                    $" due to : {ex.Message}");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = null!,
@@ -141,6 +168,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             try
             {
+                logger.LogTrace($"Try to save the episode in the database");
+
                 targetSeason.Episodes.Add(episodeToInsert);
 
                 //applicationDbContext.Entry(episodeToInsert.TVShow).State = EntityState.Detached;  
@@ -152,6 +181,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The target episode for the tv show with id : {request.TVShowEpisodeToInsertDto.TVShowId}" +
+                    $" with season id : {request.TVShowEpisodeToInsertDto.SeasonId} to add is added successfully");
+
                 return new ApiResponseDto<TVShowEpisodeDto>
                 {
                     Result = episodeToInsert.Adapt<TVShowEpisodeDto>(),
@@ -161,6 +193,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             }
             catch(Exception ex)
             {
+                logger.LogInformation($"Can not add the episode for the tv show with id : {request.TVShowEpisodeToInsertDto.TVShowId}" +
+                    $" with season id : {request.TVShowEpisodeToInsertDto.SeasonId} due to : {ex.Message}");
+
                 File.Delete(episodeFilePath);
 
                 return new ApiResponseDto<TVShowEpisodeDto>

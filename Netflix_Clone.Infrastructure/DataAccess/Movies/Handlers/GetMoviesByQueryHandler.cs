@@ -37,6 +37,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 .Where(moviesFilter)
                 .ToList() ?? [];
 
+            logger.LogTrace($"The movies after filter them are retrieved successfully");
+
             return Task.FromResult(new ApiResponseDto<IEnumerable<MovieDto>>
             {
                 Result = movies.Adapt<List<MovieDto>>(),

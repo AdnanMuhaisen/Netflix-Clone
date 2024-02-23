@@ -32,6 +32,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (targetTVShow is null)
             {
+                logger.LogInformation($"Can not find the target tv show to download the episode with " +
+                    $"Id : {request.downloadEpisodeRequestDto.EpisodeId}");
+
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
@@ -42,6 +45,10 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (!targetTVShow.IsAvailableToDownload)
             {
+                logger.LogInformation($"The target tv show with id : {request.downloadEpisodeRequestDto.TVShowId} " +
+                    $"is unavailable to download in order to download the episode with " +
+                    $"id {request.downloadEpisodeRequestDto.EpisodeId}");
+
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
@@ -62,6 +69,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                 
             if(activeUserSubscriptionPlan is null)
             {
+                logger.LogInformation($"The user with id : {request.userId} has no active subscription to download " +
+                    $"to download the episode with id {request.downloadEpisodeRequestDto.EpisodeId}");
+
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
@@ -93,6 +103,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (numberOfUserDownloadsForTheTargetSubscription >= downloadTimesSupportedByTheSubscriptionPlan)
             {
+                logger.LogInformation($"The number Of User Downloads For The Target Subscription is greater than or equal" +
+                    $" the download Times Supported By The Subscription Plan for the user with id : {request.userId}");
+
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
@@ -119,6 +132,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
             if (!File.Exists(targetEpisodeFilePath))
             {
+                logger.LogInformation($"Can not find The episode file with path : {targetEpisodeFilePath}");
+
                 return new ApiResponseDto<string>
                 {
                     Result = null!,
@@ -156,6 +171,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
 
                 await applicationDbContext.SaveChangesAsync();
 
+                logger.LogInformation($"The episode with id : {request.downloadEpisodeRequestDto.EpisodeId} " +
+                    $"is downloaded successfully");
+
                 return new ApiResponseDto<string>
                 {
                     Result = nameOfTheFileToDownload,
@@ -165,6 +183,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             }
             catch (Exception ex)
             {
+                logger.LogInformation($"Can not download the episode with id : {request.downloadEpisodeRequestDto.EpisodeId} " +
+                    $"due to : {ex.Message}");
+
                 if (File.Exists(Path.Combine(request.downloadEpisodeRequestDto.PathToDownloadFor,
                     nameOfTheFileToDownload)))
                 {
@@ -172,7 +193,6 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
                         nameOfTheFileToDownload));
                 }
 
-                //log
                 return new ApiResponseDto<string>
                 {
                     Result = null!,

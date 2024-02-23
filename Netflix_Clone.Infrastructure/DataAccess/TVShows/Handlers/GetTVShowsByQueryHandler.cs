@@ -36,6 +36,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShows.Handlers
                 .Where(tvShowsFilter)
                 .ToList() ?? [];
 
+            logger.LogTrace($"The tv shows are retrieved successfully after filtering them");
+
             return new ApiResponseDto<IEnumerable<TVShowDto>>
             {
                 Result = tvShows.Adapt<List<TVShowDto>>(),

@@ -25,6 +25,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                 .Include(x => x.Content)
                 .ToListAsync();
 
+            logger.LogTrace($"Get the user watch history for the user with id : {request.userId}");
+
             userHistory = userHistory
                 .DistinctBy(x => x.ContentId)
                 .ToList();
@@ -42,6 +44,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             // in case of there`s no movies according to preferred genres
             if (userHistory is null || !userHistory.Any() || !preferredGenres.Any())
             {
+                logger.LogInformation($"The user with id : {request.userId} has no watch history");
+
                 // return random movies
                 recommendedMovies = await applicationDbContext
                     .Movies
@@ -51,6 +55,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
                     .ToListAsync();
 
                 recommendedMovies ??= [];
+
+                logger.LogTrace("There`s no movies to retrieve from the database");
 
                 return new ApiResponseDto<IEnumerable<MovieDto>>
                 {
@@ -79,6 +85,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Movies.Handlers
             }
 
             var result = recommendedMovies.Adapt<List<MovieDto>>();
+
+            logger.LogTrace($"The recommended movies is retrieved successfully");
 
             return new ApiResponseDto<IEnumerable<MovieDto>>
             {

@@ -27,6 +27,7 @@ namespace Netflix_Clone.API.Controllers.V1
         public async Task<ActionResult<ApiResponseDto<UserWatchListDto>>> GetUserWatchList()
         {
             //This endpoint will create a watchlist for the user if the user has not created the watchlist 
+            logger.LogTrace($"Try to get the user watch list");
 
             var response = await sender.Send(new GetUserWatchListQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value));
 
@@ -44,6 +45,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("POST/AddToUserWatchlist/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<bool>>> AddToUserWatchList([FromRoute] int ContentId)
         {
+            logger.LogTrace($"Try to add to the user watch list for the current user");
+
             var response = await sender.Send(new AddToUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value, ContentId));
 
             if (response.IsSucceed && response.Result)
@@ -60,6 +63,8 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("DELETE/DeleteFromUserWatchlist/{ContentId:int}")]
         public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteFromUserWatchlist([FromRoute] int ContentId)
         {
+            logger.LogTrace($"Try to delete the content with id : {ContentId} from the current user watch list");
+
             var response = await sender.Send(new DeleteFromUserWatchListCommand(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 ContentId));
 

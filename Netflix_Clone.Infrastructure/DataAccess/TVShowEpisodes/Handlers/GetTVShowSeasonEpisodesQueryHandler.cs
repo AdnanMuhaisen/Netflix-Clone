@@ -28,6 +28,9 @@ namespace Netflix_Clone.Infrastructure.DataAccess.TVShowEpisodes.Handlers
             foreach (var episode in episodes)
                 episode.FileName = Encoding.UTF8.GetString(Convert.FromBase64String(episode.FileName));
 
+            logger.LogInformation($"The tv show season episodes with tv show id : {request.tVShowSeasonEpisodesRequestDto.TVShowId}" +
+                $" and season id : {request.tVShowSeasonEpisodesRequestDto.TVShowSeasonId} are retrieved successfully");
+
             return new ApiResponseDto<IEnumerable<TVShowEpisodeDto>>
             {
                 Result = episodes.Adapt<List<TVShowEpisodeDto>>(),
