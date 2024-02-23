@@ -1,33 +1,32 @@
-## Register Api
-### Summery 
+## Register Endpoint
+### Summary 
 	Register a new user in the system and assign this user to the default role that is **User** role
 ### Parameters
-	take a **RegistrationRequestDto** that contains the user information such as : 
+	Take a **RegistrationRequestDto** that contains the user information such as : 
 	FirstName , LastName , Email , PhoneNumber and Password
 ### Returns
-	returns the necessary information for the registered user
+	Returns the necessary information for the registered user
 
-
-## Add New User Role Api
-### Summery 
+## Add New User Role Endpoint
+### Summary 
 	Add new User Role to the system 
 ### Parameters 
-	take one string parameter which is the role name
+	Take one string parameter which is the role name
 ### Returns
-	returns AddNewRoleResponseDto that contains information of the adding result
+	Returns Add New Role Response Dto that contains information of the adding result
 
-## Login Api
-### Summery 
-	try to login the user and generate JWT for the logged in user
+## Login Endpoint
+### Summary 
+	Try to login the user and generate JWT for the logged in user
 ### Parameters 
-	take one parameter of type LoginRequestDto which contains the email and password 
+	Take one parameter of type LoginRequestDto which contains the email and password 
 ### Returns 
-	LoginRequestDto which contains the important user information and the generated token
+	Returns Login Request Dto which contains the important user information and the generated token
 
-## Assign User To Role
-### Summery
-	try to assign the user to the specified role name
+## Assign User To Role Endpoint
+### Summary
+	Try to assign the user to the specified role name
 ### parameters
-	take one parameter AssignUserToRoleRequestDto which contains the User Id and the role name
+	Take one parameter AssignUserToRoleRequestDto which contains the User Id and the role name
 ### Returns
-	returns AssignUserToRoleResponseDto that determine if the user is assigned or not
+	Returns Assign User To Role Response Dto that determine if the user is assigned or not

@@ -95,7 +95,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/{TVShowId:int}")]
-        public async Task<ActionResult<ApiResponseDto<TVShowDto>>> GetTVShow(int TVShowId)
+        public async Task<ActionResult<ApiResponseDto<TVShowDto>>> GetTVShowById(int TVShowId)
         {
             var response = await sender.Send(new GetTVShowQuery(TVShowId));
             if (response.IsSucceed && response.Result is not null)
@@ -110,7 +110,8 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/RecommendedTVShows")]
-        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetRecommendedTVShows([FromQuery] int TotalNumberOfItemsRetrieved = 10)
+        public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetRecommendedTVShows(
+            [FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
             var query = new GetRecommendedTVShowsQuery(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value,
                 TotalNumberOfItemsRetrieved);
