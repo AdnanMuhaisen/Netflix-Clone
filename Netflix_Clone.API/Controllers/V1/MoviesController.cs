@@ -17,7 +17,7 @@ namespace Netflix_Clone.API.Controllers.V1
     [ApiController]
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
-    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
+    //[Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class MoviesController(
         ILogger<MoviesController> logger,
         ISender sender,

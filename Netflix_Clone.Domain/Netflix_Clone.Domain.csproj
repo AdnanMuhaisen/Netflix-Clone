@@ -9,4 +9,8 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0-preview.1.24081.5" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Netflix_Clone.Shared\Netflix_Clone.Shared.csproj" />
+	</ItemGroup>
 </Project>
