@@ -243,33 +243,5 @@ namespace Netflix_Clone.API.Controllers.V1
         }
 
         #endregion
-
-        [HttpPost]
-        [Obsolete]
-        [Route("test")]
-        public async Task<IActionResult> Test(ISender sender, ITVShowsIndexRepository tVShowsIndexRepository)
-        {
-            var documentToInsert = new TVShowDto
-            {
-                Id = int.MaxValue,
-                Title = "Test",
-                ReleaseYear = 2024,
-                MinimumAgeToWatch = 15,
-                Synopsis = "Test Description",
-                Location = "Test Location",
-                LengthInMinutes = 5,
-                ContentGenreId = 1,
-                DirectorId = 1,
-                LanguageId = 1,
-                TotalNumberOfDownloads = 1,
-                IsAvailableToDownload=true,
-                TotalNumberOfEpisodes = 1,
-                TotalNumberOfSeasons = 1
-            };
-
-            var addResponse = await tVShowsIndexRepository.IndexDocumentAsync(documentToInsert.Adapt<TVShowDocument>());
-
-            return Ok();
-        }
     }
 }

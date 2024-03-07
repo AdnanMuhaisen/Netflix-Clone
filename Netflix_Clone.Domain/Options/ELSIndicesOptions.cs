@@ -4,5 +4,6 @@
     {
         public string MoviesIndexName { get; set; } = string.Empty;
         public string TVShowsIndexName { get; set; } = string.Empty;
+        public string UsersIndexName { get; set; } = string.Empty;
     }
 }

@@ -23,8 +23,8 @@ namespace Netflix_Clone.API.Extensions.Application
                     password: builder.Configuration["ELS:Password"]))
                 .ApiKeyAuthentication(id: builder.Configuration["ELS:ApiKeyId"], apiKey: builder.Configuration["ELS:ApiKey"])
                 .DefaultMappingFor<MovieDocument>(m => m.IndexName(builder.Configuration["ELSIndices:MoviesIndexName"]))
-                .DefaultMappingFor<TVShowDocument>(m => m.IndexName(builder.Configuration["ELSIndices:TVShowsIndexName"]));
-                //.DefaultIndex("default_index")
+                .DefaultMappingFor<TVShowDocument>(m => m.IndexName(builder.Configuration["ELSIndices:TVShowsIndexName"]))
+                .DefaultMappingFor<UserDocument>(m => m.IndexName(builder.Configuration["ELSIndices:UsersIndexName"]));
 
                 return new ElasticClient(settings);
             });
@@ -43,8 +43,8 @@ namespace Netflix_Clone.API.Extensions.Application
             builder.Services.AddScoped<ITVShowsIndexManager, TVShowsIndexManager>();
             builder.Services.AddScoped<ITVShowsIndexRepository, TVShowsIndexRepository>();
 
-
-
+            builder.Services.AddScoped<IUsersIndexManager, UsersIndexManager>();
+            builder.Services.AddScoped<IUsersIndexRepository, UsersIndexRepository>();
         }
     }
 }

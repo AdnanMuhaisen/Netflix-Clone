@@ -94,7 +94,7 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 {
                     Result = new RegistrationResponseDto
                     {
-                        IsRegistered = true,
+                        IsRegistered = true
                     },
                     Message = "Can not find the user after it is added successfully",
                     IsSucceed = false
@@ -126,7 +126,8 @@ namespace Netflix_Clone.Infrastructure.DataAccess.Handlers
                 Result = new RegistrationResponseDto
                 {
                     UserId = registeredUser.Id,
-                    UserName = registeredUser.UserName!,
+                    FirstName = registeredUser.FirstName!,
+                    LastName = registeredUser.LastName!,
                     Email = registeredUser.Email!,
                     IsRegistered = true,
                 },

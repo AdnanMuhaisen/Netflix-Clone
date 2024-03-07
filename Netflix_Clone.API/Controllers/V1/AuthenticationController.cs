@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Netflix_Clone.Domain.Documents;
 using Netflix_Clone.Domain.Options;
 using Netflix_Clone.Infrastructure.DataAccess.Authentication.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Data.Contexts;
+using Netflix_Clone.Infrastructure.DataAccess.ELS.Users.Commands;
 using Netflix_Clone.Shared.DTOs;
 
 namespace Netflix_Clone.API.Controllers.V1
@@ -37,6 +39,12 @@ namespace Netflix_Clone.API.Controllers.V1
                 ApplicationDbContext applicationDbContext = new ApplicationDbContext();
 
                 var response = await sender.Send(registrationRequestDto.Adapt<RegisterUserCommand>());
+
+                if(response is { IsSucceed: true , Result: not null})
+                {
+                    var elsResponse = await sender.Send(new AddUserDocumentCommand(response.Result.Adapt<UserDocument>()));
+                    //log the result
+                }
 
                 return response.IsSucceed ? Ok(response) : BadRequest(response);
             }
