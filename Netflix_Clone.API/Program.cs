@@ -9,9 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.RegisterDomainServices();
 builder.RegisterAPIServices();
-builder.RegisterInfrastructureServices();
 builder.RegisterApplicationServices();
+builder.RegisterInfrastructureServices();
 
+// i have convert the order of registering the services [App-Infra]
 
 var app = builder.Build();
 

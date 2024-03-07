@@ -2,7 +2,7 @@
 
 namespace Netflix_Clone.Domain.Documents
 {
-    [ElasticsearchType(RelationName = nameof(MovieDocument))]
+    [ElasticsearchType(RelationName = "movies_index")]
     public class MovieDocument : ContentDocument
     {
         [Number(NumberType.Integer,Name = "length_in_minutes")]

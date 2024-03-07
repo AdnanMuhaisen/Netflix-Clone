@@ -2,7 +2,6 @@
 
 namespace Netflix_Clone.Domain.Documents
 {
-    [ElasticsearchType(RelationName = nameof(ContentDocument))]
     public class ContentDocument : Document
     {
         [Text(Name = "title")]

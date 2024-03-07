@@ -6,9 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Netflix_Clone.Application.Services.FileOperations;
 using Netflix_Clone.Domain;
+using Netflix_Clone.Domain.Documents;
 using Netflix_Clone.Infrastructure.DataAccess.Common.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.ELS.Movies.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.ELS.Movies.Queries;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Queries;
+using Netflix_Clone.Infrastructure.DataAccess.Repositories.ELS_Repositories.ELS_IRepositories;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
@@ -17,6 +21,7 @@ namespace Netflix_Clone.API.Controllers.V1
     [ApiController]
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
+    [ApiVersion("1.1")]
     //[Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class MoviesController(
         ILogger<MoviesController> logger,
@@ -32,8 +37,11 @@ namespace Netflix_Clone.API.Controllers.V1
         private readonly IFileCompressor fileCompressor = fileCompressor;
         private readonly IOptions<ContentMovieOptions> contentOptions = contentOptions;
 
+        #region version_1.0
+
         [HttpGet]
         [Route("")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetAllMovies()
         {
             logger.LogTrace($"{nameof(GetAllMovies)} is executing");
@@ -47,6 +55,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPost]
         [Route("POST")]
+        [ApiVersion("1.0")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<MovieDto>>> AddNewMovie([FromBody] MovieToInsertDto movieToInsertDto)
         {
@@ -78,6 +87,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpDelete]
         [Route("DELETE/{ContentId:int}")]
+        [ApiVersion("1.0")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<bool>>> DeleteMovie(int ContentId)
         {
@@ -99,6 +109,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPut]
         [Route("PUT")]
+        [ApiVersion("1.0")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<MovieDto>>> UpdateMovieInfo([FromBody] MovieDto movieDto)
         {
@@ -118,6 +129,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/{ContentId:int}")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<MovieDto>>> GetMovieById([FromRoute] int ContentId)
         {
             logger.LogTrace("The get movie by Id action in started"); ;
@@ -151,6 +163,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPost]
         [Route("POST/Download")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<DownloadMovieResponseDto>>> DownloadMovie(
             [FromBody] DownloadMovieRequestDto downloadMovieRequestDto)
         {
@@ -182,6 +195,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/GetRecommendedMovies")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetRecommendedMovies(
             [FromQuery] int TotalNumberOfItemsRetrieved = 10)
         {
@@ -205,6 +219,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpGet]
         [Route("GET/GetMoviesBy")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<MovieDto>>>> GetMoviesBy(
             [FromQuery] int? GenreId = default,
             [FromQuery] int? ReleaseYear = default,
@@ -227,55 +242,105 @@ namespace Netflix_Clone.API.Controllers.V1
             }
         }
 
+        #endregion
+
+        #region version_1.1
 
         [HttpPost]
-        [Route("POST/AddRange")]
-        [Obsolete("For testing purposes",true)]
-        public async Task<ActionResult<ApiResponseDto<bool>>> AddRange()
+        [Route("POST")]
+        [ApiVersion("1.1")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<MovieDto>>> AddNewMovieVersion1_1([FromBody] MovieToInsertDto movieToInsertDto,
+            IMoviesIndexRepository moviesIndexRepository)
         {
-            for (int i = 2; i <= 1_000; i++)
+            logger.LogTrace($"{nameof(AddNewMovie)} is executing");
+
+            if (ModelState.IsValid)
             {
-                var movieToInsert = new MovieToInsertDto
+                var response = await sender.Send(movieToInsertDto.Adapt<AddNewMovieCommand>());
+
+                if (response.IsSucceed && response.Result is not null)
                 {
-                    Title = $"Movie {i}",
-                    ReleaseYear = 2021,
-                    MinimumAgeToWatch = 15,
-                    Synopsis = $"Test Description {i}",
-                    Location = @"C:\Netflix_Clone\Content\pexels-uttar-pradesh-5490959 (720p).mp4",
-                    LengthInMinutes = 5,
-                    LanguageId = 1,
-                    ContentGenreId = 1,
-                    DirectorId = 1,
-                    IsAvailableToDownload = true
-                };
+                    var elsResponse = await sender.Send(new AddNewMovieDocumentCommand(response.Result));
+                    //log the result
 
-                var response = await sender.Send(new AddNewMovieCommand(movieToInsert));
-
-                if(!response.IsSucceed || response.Result is null)
+                    return Created("", response);
+                }
+                else
                 {
                     return BadRequest(response);
                 }
             }
-            return Ok();
-        }
+            else
+            {
+                logger.LogTrace($"The model state is not valid when try to {nameof(AddNewMovie)} because\n" +
+                    $"{ModelState.Values}");
 
+                return BadRequest(default!);
+            }
+        }
 
         [HttpDelete]
-        [Route("DELETE/DeleteRange")]
-        [Obsolete("For testing purposes",true)]
-        public async Task<ActionResult<ApiResponseDto<bool>>> DeleteRange()
+        [Route("DELETE/{ContentId:int}")]
+        [ApiVersion("1.1")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<bool>>> DeleteMovieVersion1_1(int ContentId)
         {
-            for (int i = 38; i <= 223; i++)
-            {
-                var response = await sender.Send(new DeleteMovieCommand(i));
+            logger.LogTrace($"Try to delete the movie with id : {ContentId}");
 
-                if(!response.IsSucceed || !response.Result)
-                {
-                    return BadRequest(response);
-                }
+            var deleteMovieCommand = new DeleteMovieCommand(ContentId);
+
+            var response = await sender.Send(deleteMovieCommand);
+
+            if (response.IsSucceed && response.Result)
+            {
+                var elsDeleteResponse = await sender.Send(new DeleteMovieDocumentCommand(ContentId));
+                //log the response
+
+                return NoContent();
             }
-            return Ok();
+            else
+            {
+                return BadRequest(response);
+            }
         }
 
+        [HttpPut]
+        [Route("PUT")]
+        [ApiVersion("1.1")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<MovieDto>>> UpdateMovieInfoVersion1_1([FromBody] MovieDto movieDto)
+        {
+            var command = new UpdateMovieCommand(movieDto);
+
+            var response = await sender.Send(command);
+
+            if (response.IsSucceed && response.Result is not null)
+            {
+                var updateResponse = await sender.Send(new UpdateMovieDocumentCommand(movieDto));
+                //log the result
+
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
+        [HttpGet]
+        [Route("GET/Search")]
+        [ApiVersion("1.0")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
+        public async Task<ActionResult<ApiResponseDto<ELSSearchResponse<MovieDocument>>>> Search([FromQuery] string searchQuery)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery);
+
+            var searchResponse = await sender.Send(new SearchByMovieTitleOrSynopsisQuery(searchQuery));
+
+            return Ok(new ApiResponseDto<ELSSearchResponse<MovieDocument>> { IsSucceed = true, Result = searchResponse });
+        }
+
+        #endregion
     }
 }

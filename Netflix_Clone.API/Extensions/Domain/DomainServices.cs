@@ -22,6 +22,7 @@ namespace Netflix_Clone.API.Extensions.Domain
             builder.Services.Configure<UserRolesOptions>(builder.Configuration.GetSection("UserRoles"));
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
             builder.Services.Configure<ElasticsearchOptions>(builder.Configuration.GetSection("ELS"));
+            builder.Services.Configure<ELSIndicesOptions>(builder.Configuration.GetSection("ELSIndices"));
 
             TypeAdapterConfig<Movie, MovieDto>
                 .NewConfig()

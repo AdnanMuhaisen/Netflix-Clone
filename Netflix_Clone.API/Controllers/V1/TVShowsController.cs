@@ -3,6 +3,10 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Netflix_Clone.Domain.Documents;
+using Netflix_Clone.Infrastructure.DataAccess.ELS.TVShows.Commands;
+using Netflix_Clone.Infrastructure.DataAccess.ELS.TVShows.Queries;
+using Netflix_Clone.Infrastructure.DataAccess.Repositories.ELS_Repositories.ELS_IRepositories;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.TVShows.Queries;
 using Netflix_Clone.Shared.DTOs;
@@ -13,7 +17,8 @@ namespace Netflix_Clone.API.Controllers.V1
     [ApiController]
     [Route("api/[controller]")]
     [ApiVersion("1.0")]
-    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
+    [ApiVersion("1.1")]
+    //[Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
     public class TVShowsController(
         ILogger<TVShowsController> logger,
         ISender sender)
@@ -22,8 +27,11 @@ namespace Netflix_Clone.API.Controllers.V1
     {
         private readonly ISender sender = sender;
 
+        #region version_1.0
+
         [HttpGet]
         [Route("GET")]
+        [ApiVersion("1.0")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetAllTVShows()
         {
             logger.LogTrace($"Try to get all the available tv shows");
@@ -42,6 +50,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpPost]
         [Route("POST/AddNewTVShow")]
+        [ApiVersion("1.0")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<TVShowDto>>> AddNewTVShow([FromBody] TVShowToInsertDto tVShowToInsertDto)
         {
@@ -73,6 +82,7 @@ namespace Netflix_Clone.API.Controllers.V1
 
         [HttpDelete]
         [Route("DELETE/{TVShowId:int}")]
+        [ApiVersion("1.0")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteTVShow([FromRoute] int TVShowId)
         {
@@ -94,6 +104,7 @@ namespace Netflix_Clone.API.Controllers.V1
         }
 
         [HttpGet]
+        [ApiVersion("1.0")]
         [Route("GET/{TVShowId:int}")]
         public async Task<ActionResult<ApiResponseDto<TVShowDto>>> GetTVShowById(int TVShowId)
         {
@@ -109,6 +120,7 @@ namespace Netflix_Clone.API.Controllers.V1
         }
 
         [HttpGet]
+        [ApiVersion("1.0")]
         [Route("GET/RecommendedTVShows")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetRecommendedTVShows(
             [FromQuery] int TotalNumberOfItemsRetrieved = 10)
@@ -129,6 +141,7 @@ namespace Netflix_Clone.API.Controllers.V1
         }
 
         [HttpGet]
+        [ApiVersion("1.0")]
         [Route("GET/TVShowBy")]
         public async Task<ActionResult<ApiResponseDto<IEnumerable<TVShowDto>>>> GetTVShowsBy(
             [FromQuery] int? GenreId = default,
@@ -149,6 +162,114 @@ namespace Netflix_Clone.API.Controllers.V1
             {
                 return BadRequest(response);
             }
+        }
+
+        #endregion
+
+        #region version_1.1
+
+        [HttpPost]
+        [Route("POST/AddNewTVShow")]
+        [ApiVersion("1.1")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<TVShowDto>>> AddNewTVShowVersion1_1([FromBody] TVShowToInsertDto tVShowToInsertDto)
+        {
+            if (ModelState.IsValid)
+            {
+                logger.LogTrace($"Try to add the tv show with title : {tVShowToInsertDto.Title}");
+
+                var response = await sender.Send(tVShowToInsertDto.Adapt<AddNewTVShowCommand>());
+
+                if (response.IsSucceed && response.Result is not null)
+                {
+                    var elsResponse = await sender.Send(new AddNewTVShowDocumentCommand(response.Result));
+                    //log the result
+
+                    return Created("", response);
+                }
+                else
+                {
+                    return BadRequest(response);
+                }
+            }
+            else
+            {
+                return BadRequest(new ApiResponseDto<TVShowDto>
+                {
+                    Result = null!,
+                    Message = "Invalid Model State",
+                    IsSucceed = true
+                });
+            }
+        }
+
+        [HttpDelete]
+        [Route("DELETE/{TVShowId:int}")]
+        [ApiVersion("1.1")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
+        public async Task<ActionResult<ApiResponseDto<DeletionResultDto>>> DeleteTVShowVersion1_1([FromRoute] int TVShowId)
+        {
+            // there`s a cascade delete between the tbl_TVShows table and the tbl_TVShowSeasons table 
+            // but to avoid the cycles or multiple cascade paths problem : i have created a trigger 
+            // to delete the season episodes when the season is deleted.
+            logger.LogTrace($"Try to delete the tv show with id : {TVShowId}");
+
+            var response = await sender.Send(new DeleteTVShowCommand(TVShowId));
+
+            if (response.IsSucceed && response.Result.IsDeleted)
+            {
+                var elsResponse = await sender.Send(new DeleteTVShowDocumentCommand(TVShowId));
+                //log the result
+
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
+        [HttpGet]
+        [Route("GET/Search")]
+        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME)]
+        [ApiVersion("1.0")]
+        public async Task<ActionResult<ApiResponseDto<ELSSearchResponse<TVShowDocument>>>> Search([FromQuery] string searchQuery)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery);
+
+            var searchResponse = await sender.Send(new SearchByTVShowTitleOrSynopsisQuery(searchQuery));
+
+            return Ok(new ApiResponseDto<ELSSearchResponse<TVShowDocument>> { IsSucceed = true, Result = searchResponse });
+        }
+
+        #endregion
+
+        [HttpPost]
+        [Obsolete]
+        [Route("test")]
+        public async Task<IActionResult> Test(ISender sender, ITVShowsIndexRepository tVShowsIndexRepository)
+        {
+            var documentToInsert = new TVShowDto
+            {
+                Id = int.MaxValue,
+                Title = "Test",
+                ReleaseYear = 2024,
+                MinimumAgeToWatch = 15,
+                Synopsis = "Test Description",
+                Location = "Test Location",
+                LengthInMinutes = 5,
+                ContentGenreId = 1,
+                DirectorId = 1,
+                LanguageId = 1,
+                TotalNumberOfDownloads = 1,
+                IsAvailableToDownload=true,
+                TotalNumberOfEpisodes = 1,
+                TotalNumberOfSeasons = 1
+            };
+
+            var addResponse = await tVShowsIndexRepository.IndexDocumentAsync(documentToInsert.Adapt<TVShowDocument>());
+
+            return Ok();
         }
     }
 }
