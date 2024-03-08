@@ -13,6 +13,7 @@ namespace Netflix_Clone.API.Controllers.V1
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
     public class UsersController(ILogger<UsersController> logger,ISender sender) 
         : BaseController<UsersController>(logger)
     {
@@ -21,7 +22,6 @@ namespace Netflix_Clone.API.Controllers.V1
         [HttpGet]
         [Route("GET/Search")]
         [ApiVersion("1.0")]
-        [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME,Roles = ADMIN_ROLE)]
         public async Task<ActionResult<ApiResponseDto<ELSSearchResponse<UserDocument>>>> Search([FromQuery] string searchQuery)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(searchQuery);
