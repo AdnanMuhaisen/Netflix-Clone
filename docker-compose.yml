@@ -1,0 +1,32 @@
+services:
+  netflix_clone:
+    build: .
+    container_name: netflix_clone
+    ports:
+      - 6060:8080
+      - 6061:8081
+    networks:
+      - netflix_clone_net
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    container_name: netflix_clone_sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - 1433:1433
+    networks:
+      - netflix_clone_net
+    volumes:
+      - sqldata:/var/opt/mssql
+    hostname: sqlserver
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_SA_PASSWORD=@abc123@"
+#networks section
+networks:
+  netflix_clone_net:
+    driver: bridge
+#volumes section
+volumes:
+  sqldata:

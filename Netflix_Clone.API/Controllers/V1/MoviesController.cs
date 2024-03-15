@@ -12,7 +12,6 @@ using Netflix_Clone.Infrastructure.DataAccess.ELS.Movies.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.ELS.Movies.Queries;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Commands;
 using Netflix_Clone.Infrastructure.DataAccess.Movies.Queries;
-using Netflix_Clone.Infrastructure.DataAccess.Repositories.ELS_Repositories.ELS_IRepositories;
 using Netflix_Clone.Shared.DTOs;
 using System.Security.Claims;
 
@@ -250,8 +249,7 @@ namespace Netflix_Clone.API.Controllers.V1
         [Route("POST")]
         [ApiVersion("1.1")]
         [Authorize(AuthenticationSchemes = BEARER_AUTHENTICATION_SCHEME, Roles = ADMIN_ROLE)]
-        public async Task<ActionResult<ApiResponseDto<MovieDto>>> AddNewMovieVersion1_1([FromBody] MovieToInsertDto movieToInsertDto,
-            IMoviesIndexRepository moviesIndexRepository)
+        public async Task<ActionResult<ApiResponseDto<MovieDto>>> AddNewMovieVersion1_1([FromBody] MovieToInsertDto movieToInsertDto)
         {
             logger.LogTrace($"{nameof(AddNewMovie)} is executing");
 
