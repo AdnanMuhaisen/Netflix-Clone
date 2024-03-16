@@ -1,4 +1,4 @@
-# Netflix Clonn
+# Netflix Clon
 
 🔥 Key Features for Users:
 
